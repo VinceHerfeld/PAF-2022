@@ -9,8 +9,13 @@ class Flock {
 
   void run(int pause) {
     for (Boid b : boids) {
+      b.grouping = b.index;
+    }
+    for (Boid b : boids) {
+      b.grouping(boids);
+    }
+    for (Boid b : boids) {
       if (pause ==0) {
-        b.grouping=b.index;
         b.run(boids);
       }
         // Passing the entire list of boids to each boid individually

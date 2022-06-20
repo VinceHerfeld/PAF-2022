@@ -17,7 +17,7 @@ void setup()
 {
   size(1000, 1000);
   noStroke();
-  frameRate(20);
+  frameRate(200);
   ellipseMode(RADIUS);
   
   
@@ -32,10 +32,10 @@ void setup()
   for (int i =0; i < numberOfBalls; i++) {
     coordinates[2*i] = int(random(width));
     coordinates[2*i+1] = int(random(height));
-    speed[2*i] = random(-2,2);
-    speed[2*i+1]=random(-3,3);
-    direction[2*i]=1;
-    direction[2*i+1]=1;
+    speed[2*i] = random(1,2);
+    speed[2*i+1]=random(1,3);
+    direction[2*i]=int(random(0,2))*2-1;
+    direction[2*i+1]=int(random(0,2))*2-1;
     colour[i]=int(random(256));
   }
 }
@@ -55,12 +55,20 @@ void draw()
   // If it does, reverse its direction by multiplying by -1
 
    for (int i =0; i < numberOfBalls; i++) {
-    if (coordinates[2*i] > width-rad || coordinates[2*i] < rad) {
-        direction[2*i] = (coordinates[2*i] > width-rad)? -1: 1;
-        colour[i]= int(random(256));
+    if (coordinates[2*i] > width-rad) {
+      direction[2*i] = -1;
+      colour[i]= int(random(256));
+    } 
+    if (coordinates[2*i] < rad) {
+      direction[2*i] = 1;
+      colour[i]= int(random(256));
     }
-    if (coordinates[2*i+1] > height-rad || coordinates[2*i+1] < rad) {
-        direction[2*i+1] = (coordinates[2*i+1] > height-rad)? -1 : 1;
+    if (coordinates[2*i+1] > height-rad) {
+      direction[2*i+1] = -1;
+      colour[i]= int(random(256));
+    } 
+    if (coordinates[2*i+1] < rad) {
+        direction[2*i+1] = 1;
         colour[i]= int(random(256));
     }
   } 

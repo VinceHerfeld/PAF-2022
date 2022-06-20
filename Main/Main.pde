@@ -13,18 +13,18 @@ Flock flock;
 int pause;
 
 void setup() {
-  size(1000, 1000);
+  size(1900, 1000);
   pause=0;
   flock = new Flock();
   // Add an initial set of boids into the system
-  for (int i = 0; i < 150; i++) {
+  for (int i = 0; i < 300; i++) {
     flock.addBoid(new Boid(random(width), random(height)));
   }
 }
 
 void draw() {
   if (pause==0){
-    background(50);
+    background(20);
   }
   flock.run(pause);
 

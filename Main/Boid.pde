@@ -29,18 +29,16 @@ class Boid {
     maxspeed = 2;
     maxforce = 0.03;
     
-    red = int(random(256));
-    green = int(random(256));
-    blue = int(random(256));
+    red = int(55+random(200));
+    green = int(55+random(200));
+    blue = int(55+random(200));
   }
 
   void run(ArrayList<Boid> boids) {
     flock(boids);
     update();
     borders();
-    if (index==grouping) {
-      grouping(boids);
-    }
+    //grouping(boids);
     render(boids);
   }
 
@@ -55,8 +53,8 @@ class Boid {
     PVector ali = align(boids);      // Alignment
     PVector coh = cohesion(boids);   // Cohesion
     // Arbitrarily weight these forces
-    sep.mult(2.0);
-    ali.mult(1.0);
+    sep.mult(3.0);
+    ali.mult(0.2);
     coh.mult(1.0);
     // Add the force vectors to acceleration
     applyForce(sep);
@@ -99,13 +97,13 @@ class Boid {
     // heading2D() above is now heading() but leaving old syntax until Processing.js catches up
     
     fill(200, 100);
-    stroke(255);
+    noStroke();
     pushMatrix();
     translate(position.x, position.y);
     rotate(theta);
     beginShape(TRIANGLES);
-    fill(255,255,255,20);
-    ellipse(0,0,35,35);
+    fill(boids.get(grouping).red,boids.get(grouping).green, boids.get(grouping).blue , 20);
+    //ellipse(0,0,35,35);
     fill(boids.get(grouping).red,boids.get(grouping).green, boids.get(grouping).blue );
     vertex(0, -r*3);
     vertex(-r*2, r*3);
@@ -215,18 +213,32 @@ class Boid {
   }
   
   void grouping(ArrayList<Boid> boids) {
-    float neighbordist = 100;
+    float neighbordist = 70;
+    int min = 0;
     int count=0;
+    ArrayList<Integer> neighbours = new ArrayList<>();
     for (Boid other : boids) {
       float d = PVector.dist(position, other.position);
       if ((d > 0) && (d < neighbordist)) {
+        neighbours.add(other.index);
         if (count==0) {
-          grouping = other.index;
+          min = other.grouping;
           count++;
         } else { 
-          other.index = grouping; 
-          count++; 
+          if (min > other.grouping) {
+            min = other.grouping;
+          }
         }
+      if (min < index) {
+        grouping = min;
+        for (int i : neighbours) {
+          boids.get(i).grouping = min;
+        }
+      } else {
+        for (int i : neighbours) {
+          boids.get(i).grouping = index;
+        }
+      }
       }
     }
   }
