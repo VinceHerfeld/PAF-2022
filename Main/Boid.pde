@@ -15,8 +15,9 @@ class Boid {
   int group;
   int index;
 
-    Boid(float x, float y) {
+  Boid(float x, float y, int index) {
     acceleration = new PVector(0, 0);
+    this.index = index;
 
     // This is a new PVector method not yet implemented in JS
     // velocity = PVector.random2D();
@@ -106,9 +107,12 @@ class Boid {
     fill(boids.get(group).red,boids.get(group).green, boids.get(group).blue , 20);
     //ellipse(0,0,35,35);
     fill(boids.get(group).red,boids.get(group).green, boids.get(group).blue );
-    vertex(0, -r*3);
-    vertex(-r*2, r*3);
-    vertex(r*2, r*3);
+  
+
+  
+    vertex(0, -r*2);
+    vertex(-r, r*2);
+    vertex(r, r*2);
     endShape();
     popMatrix();
   }
