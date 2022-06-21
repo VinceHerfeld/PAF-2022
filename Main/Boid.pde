@@ -108,7 +108,7 @@ class Boid {
     rotate(theta);
     beginShape(TRIANGLES);
     //ellipse(0,0,35,35);
-    fill(boids.get(grouping).red,boids.get(grouping).green, boids.get(grouping).blue );
+    fill(boids.get(group).red,boids.get(group).green, boids.get(group).blue );
     vertex(0, -r*3);
     vertex(-r*2, r*3);
     vertex(r*2, r*3);
@@ -123,6 +123,14 @@ class Boid {
     if (position.x > width+r) position.x = -r;
     if (position.y > height+r) position.y = -r;
   }
+  float getX(){
+    return position.x;
+  }
+  
+  float getY(){
+    return position.y;
+  }
+
 
   // Separation
   // Method checks for nearby boids and steers away
@@ -253,8 +261,8 @@ class Boid {
   void searchNeighbour(Boid[][] map){
     int x = (int)position.x;
     int y = (int)position.y;
-    for(int i = -20; i<20; i++){
-      for(int j=-20; j<20; j++){
+    for(int i = -70; i<70; i++){
+      for(int j=-70; j<70; j++){
         if(i==0 && j==0){
         }
         else{
