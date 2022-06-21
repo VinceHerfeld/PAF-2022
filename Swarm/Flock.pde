@@ -8,6 +8,7 @@ class Flock {
   Flock() {
     boids = new ArrayList<Boid>(); // Initialize the ArrayList
     groups = new ArrayList<ArrayList<Boid>>();
+    groups.add(new ArrayList<Boid>()); 
   }
 
   void run() {
@@ -15,6 +16,8 @@ class Flock {
       b.run(boids);  // Passing the entire list of boids to each boid individually
     }
     setGroups();
+    groupChange();
+    print(groups);
   }
 
   void addBoid(Boid b) {
@@ -36,11 +39,52 @@ class Flock {
         float d = PVector.dist(b1.position, b2.position);
         if (d < groupdist){
           int g = b1.getGroup();
-          b2.setGroup(g);
-          groups.get(g).add(b2);
+          if(g == 0){
+            g = b2.getGroup();
+            if(g == 0){
+              g = groups.size();
+              groups.get(0).remove(b1);
+              groups.get(0).remove(b2);
+              b1.setGroup(g);
+              b2.setGroup(g);
+              groups.add(new ArrayList<Boid>());
+              groups.get(g).add(b2);
+              groups.get(g).add(b1);
+            }
+            else{
+              groups.get(g).add(b1);
+              groups.get(b1.getGroup()).remove(b1);
+              b1.setGroup(g);
+            }
+          }
+          else{
+            groups.get(b2.getGroup()).remove(b2);
+            b2.setGroup(g);
+            groups.get(g).add(b2);
+          }     
+        }
+       }
+     } 
+  }
+  
+  void groupChange(){
+    boolean quits;
+    for (ArrayList<Boid> group : groups){
+      for (Boid b1 : group){
+        quits = true;
+        for (Boid b2 : group){
+          float d = PVector.dist(b1.position, b2.position);
+          if (d <= groupdist){
+            quits = false;
+            break;
+          }
+        }
+        if(quits){
+          group.remove(b1);
+          b1.setGroup(0);
         }
       }
-   } 
+    }
   }
   
 
