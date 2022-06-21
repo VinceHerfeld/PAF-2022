@@ -19,7 +19,7 @@ void setup() {
   flock = new Flock();
   // Add an initial set of boids into the system
   for (int i = 0; i < 30; i++) {
-    flock.addBoid(new Boid(random(width), random(height)));
+    flock.addBoid(new Boid(random(width), random(height), i));
   }
 }
 

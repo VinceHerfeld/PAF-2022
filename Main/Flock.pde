@@ -17,6 +17,7 @@ class Flock {
     for (Boid b : boids) {
       b.group = b.index;
     }
+    //groups.clear();
     for (Boid b : boids) {
       b.grouping(this, boids);
     }
@@ -26,7 +27,8 @@ class Flock {
       }
     }
     checkGroups();
-    for(int g : trajectories.keySet()){
+    print(groups + " --" + trajectories.keySet());
+    for(int g : groups){
       findCenter(g);
       int g_red = boids.get(g).red;
       int g_green = boids.get(g).green;
@@ -38,7 +40,6 @@ class Flock {
   }
 
   void addBoid(Boid b) {
-    b.index = boids.size();
     boids.add(b);
   }
   
@@ -55,7 +56,7 @@ class Flock {
       trajectories.get(group).add(barycentre.div(num));
     }
     else {
-      print("No boids in group");
+      print("No boids in group : " + group + "\n");
       return;
     }
   }
@@ -75,11 +76,12 @@ class Flock {
         trajectories.put(g, new ArrayList<PVector>());
       }
     }
+    /*
     for(int g : trajectories.keySet()){
       if(!groups.contains(g)){
         trajectories.remove(g);
       }
-    }
+    }*/
   }
 
 }

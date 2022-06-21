@@ -14,8 +14,9 @@ class Boid {
   int group;
   int index;
 
-    Boid(float x, float y) {
+    Boid(float x, float y, int index) {
     acceleration = new PVector(0, 0);
+    this.index = index;
 
     // This is a new PVector method not yet implemented in JS
     // velocity = PVector.random2D();
@@ -229,16 +230,24 @@ class Boid {
             min = other.group;
           }
         }
-      if (min < index) {
-        group = min;
-        for (int i : neighbours) {
-          boids.get(i).group = min;
+       if (min < index) {
+          group = min;
+          for (int i : neighbours) {
+            int g = boids.get(i).group;
+            if(flock.groups.contains(g)){
+              flock.groups.remove(g);
+            }
+            boids.get(i).group = min;
+          }
+        } else {
+          for (int i : neighbours) {
+            int g = boids.get(i).group;
+            if(flock.groups.contains(g)){
+              flock.groups.remove(g);
+            }
+            boids.get(i).group = index;
+          }
         }
-      } else {
-        for (int i : neighbours) {
-          boids.get(i).group = index;
-        }
-      }
       flock.groups.add(group);
       }
     }
