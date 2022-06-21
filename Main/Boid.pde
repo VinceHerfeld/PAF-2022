@@ -11,7 +11,7 @@ class Boid {
   int red;
   int green;
   int blue;
-  int grouping;
+  int group;
   int index;
 
     Boid(float x, float y) {
@@ -25,7 +25,7 @@ class Boid {
     velocity = new PVector(cos(angle), sin(angle));
 
     position = new PVector(x, y);
-    r = 2.0;
+    r = 4.0;
     maxspeed = 2;
     maxforce = 0.03;
     
@@ -39,7 +39,7 @@ class Boid {
     update();
     borders();
     //grouping(boids);
-    render(boids);
+    render( boids);
   }
 
   void applyForce(PVector force) {
@@ -93,7 +93,7 @@ class Boid {
 
   void render(ArrayList<Boid> boids) {
     // Draw a triangle rotated in the direction of velocity
-    float theta = velocity.heading2D() + radians(90);
+    float theta = velocity.heading() + radians(90);
     // heading2D() above is now heading() but leaving old syntax until Processing.js catches up
     
     fill(200, 100);
@@ -102,12 +102,12 @@ class Boid {
     translate(position.x, position.y);
     rotate(theta);
     beginShape(TRIANGLES);
-    fill(boids.get(grouping).red,boids.get(grouping).green, boids.get(grouping).blue , 20);
+    fill(boids.get(group).red,boids.get(group).green, boids.get(group).blue , 20);
     //ellipse(0,0,35,35);
-    fill(boids.get(grouping).red,boids.get(grouping).green, boids.get(grouping).blue );
-    vertex(0, -r*3);
-    vertex(-r*2, r*3);
-    vertex(r*2, r*3);
+    fill(boids.get(group).red,boids.get(group).green, boids.get(group).blue );
+    vertex(0, -r*2);
+    vertex(-r, r*2);
+    vertex(r, r*2);
     endShape();
     popMatrix();
   }
@@ -212,7 +212,7 @@ class Boid {
     }
   }
   
-  void grouping(ArrayList<Boid> boids) {
+  void grouping(Flock flock, ArrayList<Boid> boids) {
     float neighbordist = 70;
     int min = 0;
     int count=0;
@@ -222,23 +222,24 @@ class Boid {
       if ((d > 0) && (d < neighbordist)) {
         neighbours.add(other.index);
         if (count==0) {
-          min = other.grouping;
+          min = other.group;
           count++;
         } else { 
-          if (min > other.grouping) {
-            min = other.grouping;
+          if (min > other.group) {
+            min = other.group;
           }
         }
       if (min < index) {
-        grouping = min;
+        group = min;
         for (int i : neighbours) {
-          boids.get(i).grouping = min;
+          boids.get(i).group = min;
         }
       } else {
         for (int i : neighbours) {
-          boids.get(i).grouping = index;
+          boids.get(i).group = index;
         }
       }
+      flock.groups.add(group);
       }
     }
   }

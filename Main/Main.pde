@@ -8,16 +8,17 @@
  * 
  * Click the mouse to add a new boid.
  */
+import grafica.*;
 
 Flock flock;
 int pause;
 
 void setup() {
-  size(1900, 1000);
+  size(800, 800);
   pause=0;
   flock = new Flock();
   // Add an initial set of boids into the system
-  for (int i = 0; i < 300; i++) {
+  for (int i = 0; i < 30; i++) {
     flock.addBoid(new Boid(random(width), random(height)));
   }
 }
