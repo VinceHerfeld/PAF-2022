@@ -23,7 +23,7 @@ class Boid {
     velocity = new PVector(cos(angle), sin(angle));
 
     position = new PVector(x, y);
-    r = 2.0;
+    r = 4.0;
     maxspeed = 2;
     maxforce = 0.03;
     
@@ -105,7 +105,7 @@ class Boid {
     vertex(r, r*2);
     endShape();
     fill(255, 10);
-    circle(0,0,50);
+    //circle(0,0,50);
     popMatrix();
 
   }
