@@ -10,22 +10,32 @@
  */
 
 Flock flock;
+int pause;
+
 
 void setup() {
-  size(640, 360);
+  size(1900, 1000);
+
+  pause=0;
   flock = new Flock();
   // Add an initial set of boids into the system
-  for (int i = 0; i < 150; i++) {
-    flock.addBoid(new Boid(width/2,height/2));
+  for (int i = 0; i < 30; i++) {
+    flock.addBoid(new Boid(random(width), random(height), i));
   }
 }
 
 void draw() {
-  background(50);
-  flock.run();
+  if (pause==0){
+    background(20);
+  }
+  flock.run(pause);
+  flock.updateMap();
+
+  
 }
 
 // Add a new boid into the System
+
 void mousePressed() {
-  flock.addBoid(new Boid(mouseX,mouseY));
+  pause = 1-pause;
 }

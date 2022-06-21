@@ -8,28 +8,50 @@ class Boid {
   float r;
   float maxforce;    // Maximum steering force
   float maxspeed;    // Maximum speed
+  int red;
+  int green;
+  int blue;
+  int grouping;
+  int index;
 
-    Boid(float x, float y) {
-    acceleration = new PVector(0, 0);
+  
 
-    // This is a new PVector method not yet implemented in JS
-    // velocity = PVector.random2D();
 
-    // Leaving the code temporarily this way so that this example runs in JS
-    float angle = random(TWO_PI);
-    velocity = new PVector(cos(angle), sin(angle));
-
-    position = new PVector(x, y);
-    r = 2.0;
-    maxspeed = 2;
-    maxforce = 0.03;
+    Boid(float x, float y, int id) {
+      index = id;
+      acceleration = new PVector(0, 0);
+  
+      // This is a new PVector method not yet implemented in JS
+      // velocity = PVector.random2D();
+  
+      // Leaving the code temporarily this way so that this example runs in JS
+      float angle = random(TWO_PI);
+      velocity = new PVector(cos(angle), sin(angle));
+  
+      position = new PVector(x, y);
+      r = 2.0;
+      maxspeed = 2;
+      maxforce = 0.03;
+      
+      red = int(55+random(200));
+      green = int(55+random(200));
+      blue = int(55+random(200));
   }
 
   void run(ArrayList<Boid> boids) {
     flock(boids);
     update();
     borders();
-    render();
+    //grouping(boids);
+    render(boids);
+  }
+  
+  float getX(){
+    return position.x;
+  }
+  
+  float getY(){
+    return position.y;
   }
 
   void applyForce(PVector force) {
@@ -43,7 +65,7 @@ class Boid {
     PVector ali = align(boids);      // Alignment
     PVector coh = cohesion(boids);   // Cohesion
     // Arbitrarily weight these forces
-    sep.mult(1.5);
+    sep.mult(3.0);
     ali.mult(1.0);
     coh.mult(1.0);
     // Add the force vectors to acceleration
@@ -81,20 +103,25 @@ class Boid {
     return steer;
   }
 
-  void render() {
+  void render(ArrayList<Boid> boids) {
     // Draw a triangle rotated in the direction of velocity
     float theta = velocity.heading2D() + radians(90);
     // heading2D() above is now heading() but leaving old syntax until Processing.js catches up
     
     fill(200, 100);
-    stroke(255);
+    noStroke();
     pushMatrix();
     translate(position.x, position.y);
+    
+
+    
     rotate(theta);
     beginShape(TRIANGLES);
-    vertex(0, -r*2);
-    vertex(-r, r*2);
-    vertex(r, r*2);
+    //ellipse(0,0,35,35);
+    fill(boids.get(grouping).red,boids.get(grouping).green, boids.get(grouping).blue );
+    vertex(0, -r*3);
+    vertex(-r*2, r*3);
+    vertex(r*2, r*3);
     endShape();
     popMatrix();
   }
@@ -198,4 +225,55 @@ class Boid {
       return new PVector(0, 0);
     }
   }
+  
+  void grouping(ArrayList<Boid> boids) {
+    float neighbordist = 70;
+    int min = 0;
+    int count=0;
+    ArrayList<Integer> neighbours = new ArrayList<>();
+    for (Boid other : boids) {
+      float d = PVector.dist(position, other.position);
+      if ((d > 0) && (d < neighbordist)) {
+        neighbours.add(other.index);
+        if (count==0) {
+          min = other.grouping;
+          count++;
+        } else { 
+          if (min > other.grouping) {
+            min = other.grouping;
+          }
+        }
+      if (min < index) {
+        grouping = min;
+        for (int i : neighbours) {
+          boids.get(i).grouping = min;
+        }
+      } else {
+        for (int i : neighbours) {
+          boids.get(i).grouping = index;
+        }
+      }
+      }
+    }
+  }
+  
+  void searchNeighboor(Boid[][] map){
+    int x = (int)position.x;
+    int y = (int)position.y;
+    for(int i = -20; i<20; i++){
+      for(int j=-20; j<20; j++){
+        if(i==0 && j==0){
+        }
+        else{
+          
+          int X = flock.mod_width(x+i);
+          int Y = flock.mod_height(y+j);
+          if(map[X][Y]!= null){
+            int id = map[X][Y].index;
+          }
+        }
+      }
+    }
+  }
+    
 }
