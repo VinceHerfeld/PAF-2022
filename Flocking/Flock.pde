@@ -15,40 +15,42 @@ class Flock {
     trajectories = new HashMap<Integer, ArrayList<PVector>>();
   }
   void updateMap(){
-    for (int i=0; i<1000;i++){
+    for (int i=0; i<width;i++){
       Arrays.fill(map[i],null);
     }
     for(Boid b : boids){
       int x = (int)b.getX();
       int y = (int)b.getY();
-      map[(x+1000)%1000][(y+1000)%1000] = b;
+      map[mod_width(x)][mod_height(y)] = b;
     }
   }
   void run(int pause) {
-    for (Boid b : boids){
-      b.searchNeighboor(this.map);
-    }
-    for (Boid b : boids) {
-      b.group = b.index;
-    }
-    groups.clear();
-    for (Boid b : boids) {
-      b.grouping(boids);
-    }
-    for (Boid b : boids) {
-      if (pause ==0) {
-        b.run(boids);
+    if (pause==0) {
+      for (Boid b : boids){
+        b.searchNeighbour(this.map);
       }
-    }
-    checkGroups();
-    print(groups + " --" + trajectories.keySet());
-    for(int g : groups){
-      findCenter(g);
-      int g_red = boids.get(g).red;
-      int g_green = boids.get(g).green;
-      int g_blue = boids.get(g).blue;
-      for (PVector p : trajectories.get(g)){
-        renderCenter(p, g_red, g_green, g_blue);
+      for (Boid b : boids) {
+        b.group = b.index;
+      }
+      groups.clear();
+      for (Boid b : boids) {
+        b.grouping(boids);
+      }
+      for (Boid b : boids) {
+        if (pause ==0) {
+          b.run(boids);
+        }
+      }
+      checkGroups();
+      println(groups + " --" + trajectories.keySet());
+      for(int g : groups){
+        findCenter(g);
+        int g_red = boids.get(g).red;
+        int g_green = boids.get(g).green;
+        int g_blue = boids.get(g).blue;
+        for (PVector p : trajectories.get(g)){
+          renderCenter(p, g_red, g_green, g_blue);
+        }
       }
     }
   }
@@ -109,7 +111,7 @@ class Flock {
       x += width;
       return x;
     }
-    else if(x>width){
+    else if(x>=width){
       x -= width;
       return x;
     }
@@ -120,7 +122,7 @@ class Flock {
       y += height;
       return y;
     }
-    else if(y>height){
+    else if(y>=height){
       y -= height;
       return y;
     }

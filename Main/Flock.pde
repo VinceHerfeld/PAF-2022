@@ -25,30 +25,32 @@ class Flock {
     }
   }
   void run(int pause) {
-    for (Boid b : boids){
-      b.searchNeighbour(this.map);
-    }
-    for (Boid b : boids) {
-      b.group = b.index;
-    }
-    groups.clear();
-    for (Boid b : boids) {
-      b.grouping(boids);
-    }
-    for (Boid b : boids) {
-      if (pause ==0) {
-        b.run(boids);
+    if (pause==0) {
+      for (Boid b : boids){
+        b.searchNeighbour(this.map);
       }
-    }
-    checkGroups();
-    println(groups + " --" + trajectories.keySet());
-    for(int g : groups){
-      findCenter(g);
-      int g_red = boids.get(g).red;
-      int g_green = boids.get(g).green;
-      int g_blue = boids.get(g).blue;
-      for (PVector p : trajectories.get(g)){
-        renderCenter(p, g_red, g_green, g_blue);
+      for (Boid b : boids) {
+        b.group = b.index;
+      }
+      groups.clear();
+      for (Boid b : boids) {
+        b.grouping(boids);
+      }
+      for (Boid b : boids) {
+        if (pause ==0) {
+          b.run(boids);
+        }
+      }
+      checkGroups();
+      println(groups + " --" + trajectories.keySet());
+      for(int g : groups){
+        findCenter(g);
+        int g_red = boids.get(g).red;
+        int g_green = boids.get(g).green;
+        int g_blue = boids.get(g).blue;
+        for (PVector p : trajectories.get(g)){
+          renderCenter(p, g_red, g_green, g_blue);
+        }
       }
     }
   }
