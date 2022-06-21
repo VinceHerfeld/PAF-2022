@@ -54,7 +54,7 @@ class Boid {
     PVector coh = cohesion(boids);   // Cohesion
     // Arbitrarily weight these forces
     sep.mult(3.0);
-    ali.mult(0.2);
+    ali.mult(1.0);
     coh.mult(1.0);
     // Add the force vectors to acceleration
     applyForce(sep);
