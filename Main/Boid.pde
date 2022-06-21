@@ -26,7 +26,7 @@ class Boid {
     velocity = new PVector(cos(angle), sin(angle));
 
     position = new PVector(x, y);
-    r = 2.0;
+    r = 4.0;
     maxspeed = 2;
     maxforce = 0.03;
     
@@ -35,12 +35,12 @@ class Boid {
     blue = int(55+random(200));
   }
 
-  void run(Flock flock, ArrayList<Boid> boids) {
+  void run(ArrayList<Boid> boids) {
     flock(boids);
     update();
     borders();
-    //grouping(flock, boids);
-    render(flock, boids);
+    //grouping(boids);
+    render( boids);
   }
 
   void applyForce(PVector force) {
@@ -92,9 +92,9 @@ class Boid {
     return steer;
   }
 
-  void render(Flock flock, ArrayList<Boid> boids) {
+  void render(ArrayList<Boid> boids) {
     // Draw a triangle rotated in the direction of velocity
-    float theta = velocity.heading2D() + radians(90);
+    float theta = velocity.heading() + radians(90);
     // heading2D() above is now heading() but leaving old syntax until Processing.js catches up
     
     fill(200, 100);
@@ -230,19 +230,19 @@ class Boid {
             min = other.group;
           }
         }
-        if (min < index) {
-          group = min;
-          for (int i : neighbours) {
-            flock.groups.remove(boids.get(i).group);
-            boids.get(i).group = min;
-          }
-        } else {
-          for (int i : neighbours) {
-            flock.groups.remove(boids.get(i).group);
-            boids.get(i).group = index;
-          }
+      if (min < index) {
+        group = min;
+        for (int i : neighbours) {
+          flock.groups.remove(boids.get(i).group);
+          boids.get(i).group = min;
         }
-        flock.groups.add(group);
+      } else {
+        for (int i : neighbours) {
+          flock.groups.remove(boids.get(i).group);
+          boids.get(i).group = index;
+        }
+      }
+      flock.groups.add(group);
       }
     }
   }
