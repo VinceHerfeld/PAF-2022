@@ -23,6 +23,9 @@ void draw() {
 
 void drawGame() {
   background(0);
+  fill(255);
+  textSize(100);
+  text("Lancer l'appli ici", 0, height/2);
   
   // Pew, pew, I'm a game!
 }
@@ -57,8 +60,7 @@ void mouseClicked() {
     if(mouseX>=i*(width/5) && mouseX <=i*(width/5) + 100 && mouseY>=100 && mouseY<=200){
       nMin = i;
       print(nMin);
-      return;
+      screenState = 1;
     }
   }
-  screenState = 1;
 }
