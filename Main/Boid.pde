@@ -102,7 +102,7 @@ class Boid {
     if (this.newGroup == 0){
       fill(200, 200, 200);
     }else{
-      fill(colors.get((biject[this.newGroup] - 1) % nbColors).x, colors.get((biject[this.newGroup] - 1) % nbColors).y, colors.get((biject[this.newGroup] - 1) % nbColors).z);
+      fill(colors.get((biject[this.newGroup] - 1) % 12).x, colors.get((biject[this.newGroup] - 1) % 12).y, colors.get((biject[this.newGroup] - 1) % 12).z);
     }
     pushMatrix();
     translate(position.x, position.y);
@@ -271,26 +271,21 @@ class Boid {
     this.neighbors.clear();
     int x = (int)position.x;
     int y = (int)position.y;
-    for(int i = -35; i<35; i++){
-      for(int j=-35; j<35; j++){
+    for(int i = -50; i<50; i++){
+      for(int j=-50; j<50; j++){
         if(i==0 && j==0){
-          int X = flock.mod_width(x+i);
-          int Y = flock.mod_height(y+j);
-          if(map[int(X/maillage)][int(Y/maillage)]!= this){
-            this.neighbors.add(map[int(X/maillage)][int(Y/maillage)]);
-          }
         }
         else{
-          if (i*i+j*j < 35*35) {
-            int X = flock.mod_width(x+i);
-            int Y = flock.mod_height(y+j);
-            if(map[int(X/maillage)][int(Y/maillage)]!= null){
-              this.neighbors.add(map[int(X/maillage)][int(Y/maillage)]);
-              //print("1neighbour");
-            }
+          
+          int X = flock.mod_width(x+i);
+          int Y = flock.mod_height(y+j);
+          if(map[X][Y]!= null){
+            this.neighbors.add(map[X][Y]);
+            //print("1neighbour");
           }
         }
       }
     }
   }
+  
 }
