@@ -214,45 +214,5 @@ class Flock {
     }
     return y;
   }
-  
-  void findCenter(int group){
-    PVector barycentre = new PVector();
-    int num = 0;
-    for (Boid b : boids){
-      if (b.group == group ){
-        barycentre.add(b.position);
-        num++;
-      }
-    }
-    if (num > 0){
-      trajectories.get(group).add(barycentre.div(num));
-    }
-    else {
-      print("No boids in group");
-      return;
-    }
-  }
-  
-  void renderCenter(PVector b, int red, int green, int blue){
-    if(b != null){
-      pushMatrix();
-      fill(red,green,blue, 150);
-      ellipse(b.x, b.y, 2, 2);
-      popMatrix();
-    }
-  }
-  
-  void checkGroups(){
-    for(int g : groups){
-      if(!trajectories.containsKey(g)){
-        trajectories.put(g, new ArrayList<PVector>());
-      }
-    }
-    for(int g : trajectories.keySet()){
-      if(!groups.contains(g)){
-        trajectories.remove(g);
-      }
-    }
-  }
 
 }

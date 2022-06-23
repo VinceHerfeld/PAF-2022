@@ -8,7 +8,6 @@
  * 
  * Click the mouse to add a new boid.
  */
-import grafica.*;
 
 Flock flock;
 int pause;
@@ -76,3 +75,5 @@ void mousePressed() {
 void mousePressed() {
   pause = 1-pause;
 }
+
+
