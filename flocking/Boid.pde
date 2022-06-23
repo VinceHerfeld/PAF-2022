@@ -11,11 +11,6 @@ class Boid {
   float maxspeed;    // Maximum speed
   ArrayList<Boid> neighbors;
   int oldGroup, newGroup;
-  int red;
-  int green;
-  int blue;
-  int group;
-  int index;
 
   Boid(float x, float y) {
     acceleration = new PVector(0, 0);
@@ -34,14 +29,13 @@ class Boid {
     
     this.oldGroup = 0;
     this.newGroup = 0;
-    this.neighbors = new ArrayList<Boid>();
     }
 
-  void run(ArrayList<Boid> boids, Boid [][] map) {
+  void run(ArrayList<Boid> boids) {
     this.oldGroup = newGroup;
     this.newGroup = 0;
     flock(boids);
-    searchNeighbours(map);
+    coreBoid(boids);
     update();
     borders();
   }
@@ -97,12 +91,12 @@ class Boid {
 
   void render(int[] biject) {
     // Draw a triangle rotated in the direction of velocity
-    float theta = velocity.heading() + radians(90);
+    float theta = velocity.heading2D() + radians(90);
     // heading2D() above is now heading() but leaving old syntax until Processing.js catches up
     if (this.newGroup == 0){
       fill(200, 200, 200);
     }else{
-      fill(colors.get((biject[this.newGroup] - 1) % nbColors).x, colors.get((biject[this.newGroup] - 1) % nbColors).y, colors.get((biject[this.newGroup] - 1) % nbColors).z);
+      fill(colors.get((biject[this.newGroup] - 1) % 12).x, colors.get((biject[this.newGroup] - 1) % 12).y, colors.get((biject[this.newGroup] - 1) % 12).z);
     }
     pushMatrix();
     translate(position.x, position.y);
@@ -127,13 +121,7 @@ class Boid {
     if (position.x > width+r) position.x = -r;
     if (position.y > height+r) position.y = -r;
   }
-  float getX(){
-    return position.x;
-  }
-  
-  float getY(){
-    return position.y;
-  }
+
   // Separation
   // Method checks for nearby boids and steers away
   PVector separate (ArrayList<Boid> boids) {
@@ -226,7 +214,7 @@ class Boid {
       return new PVector(0, 0);
     }
   }
-  /*
+  
   void coreBoid(ArrayList<Boid> boids){
     float neighbordist = disNeighbor;
     this.neighbors = new ArrayList<Boid>();
@@ -237,8 +225,7 @@ class Boid {
       }
     }
   }
-  */
-
+  
   void propagateGroup(int g){
     this.newGroup = g;
     for (Boid neighbor : this.neighbors){
@@ -264,33 +251,9 @@ class Boid {
   }
   
   float distance(Boid other){
-    PVector vect = new PVector(min(abs(this.position.x - other.position.x), width - abs(this.position.x - other.position.x)), min(abs(this.position.y - other.position.y), height - abs(this.position.y - other.position.y)));
+    PVector vect = new PVector(min(this.position.x - other.position.x, width - this.position.x + other.position.x), min(this.position.y - other.position.y, height - this.position.y + other.position.y));
     return vect.mag();
   }
-  void searchNeighbours(Boid[][] map){
-    this.neighbors.clear();
-    int x = (int)position.x;
-    int y = (int)position.y;
-    for(int i = -35; i<35; i++){
-      for(int j=-35; j<35; j++){
-        if(i==0 && j==0){
-          int X = flock.mod_width(x+i);
-          int Y = flock.mod_height(y+j);
-          if(map[int(X/maillage)][int(Y/maillage)]!= this){
-            this.neighbors.add(map[int(X/maillage)][int(Y/maillage)]);
-          }
-        }
-        else{
-          if (i*i+j*j < 35*35) {
-            int X = flock.mod_width(x+i);
-            int Y = flock.mod_height(y+j);
-            if(map[int(X/maillage)][int(Y/maillage)]!= null){
-              this.neighbors.add(map[int(X/maillage)][int(Y/maillage)]);
-              //print("1neighbour");
-            }
-          }
-        }
-      }
-    }
-  }
+   
+  
 }

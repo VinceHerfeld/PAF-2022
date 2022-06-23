@@ -1,5 +1,5 @@
+import java.util.*;
 // The Boid class
-
 
 class Boid {
 
@@ -9,16 +9,15 @@ class Boid {
   float r;
   float maxforce;    // Maximum steering force
   float maxspeed;    // Maximum speed
-  ArrayList<Boid> neighbors;
-  int oldGroup, newGroup;
   int red;
   int green;
   int blue;
   int group;
   int index;
 
-  Boid(float x, float y) {
+  Boid(float x, float y, int id) {
     acceleration = new PVector(0, 0);
+    this.index = id;
 
     // This is a new PVector method not yet implemented in JS
     // velocity = PVector.random2D();
@@ -32,18 +31,17 @@ class Boid {
     maxspeed = 2;
     maxforce = 0.03;
     
-    this.oldGroup = 0;
-    this.newGroup = 0;
-    this.neighbors = new ArrayList<Boid>();
-    }
+    red = int(56+random(200));
+    green = int(56+random(200));
+    blue = int(56+random(200));
+  }
 
-  void run(ArrayList<Boid> boids, Boid [][] map) {
-    this.oldGroup = newGroup;
-    this.newGroup = 0;
+  void run(ArrayList<Boid> boids) {
     flock(boids);
-    searchNeighbours(map);
     update();
     borders();
+    //grouping(boids);
+    render( boids);
   }
 
   void applyForce(PVector force) {
@@ -57,7 +55,7 @@ class Boid {
     PVector ali = align(boids);      // Alignment
     PVector coh = cohesion(boids);   // Cohesion
     // Arbitrarily weight these forces
-    sep.mult(1.5);
+    sep.mult(3.0);
     ali.mult(1.0);
     coh.mult(1.0);
     // Add the force vectors to acceleration
@@ -95,29 +93,27 @@ class Boid {
     return steer;
   }
 
-  void render(int[] biject) {
+  void render(ArrayList<Boid> boids) {
     // Draw a triangle rotated in the direction of velocity
     float theta = velocity.heading() + radians(90);
     // heading2D() above is now heading() but leaving old syntax until Processing.js catches up
-    if (this.newGroup == 0){
-      fill(200, 200, 200);
-    }else{
-      fill(colors.get((biject[this.newGroup] - 1) % nbColors).x, colors.get((biject[this.newGroup] - 1) % nbColors).y, colors.get((biject[this.newGroup] - 1) % nbColors).z);
-    }
+    
+    fill(200, 100);
+    noStroke();
     pushMatrix();
     translate(position.x, position.y);
-    rotate(theta);
-    noStroke();
-    //rect(0, 0, 10, 10);
-    beginShape(TRIANGLES);
-    vertex(0, -r*2);
-    vertex(-r, r*2);
-    vertex(r, r*2);
-    endShape();
-    fill(255, 10);
-    //circle(0,0,50);
-    popMatrix();
+    
 
+    
+    rotate(theta);
+    beginShape(TRIANGLES);
+    //ellipse(0,0,35,35);
+    fill(boids.get(group).red,boids.get(group).green, boids.get(group).blue );
+    vertex(0, -r*3);
+    vertex(-r*2, r*3);
+    vertex(r*2, r*3);
+    endShape();
+    popMatrix();
   }
 
   // Wraparound
@@ -134,15 +130,17 @@ class Boid {
   float getY(){
     return position.y;
   }
+
+
   // Separation
   // Method checks for nearby boids and steers away
   PVector separate (ArrayList<Boid> boids) {
-    float desiredseparation = disInteract * 0.5;
+    float desiredseparation = 25.0f;
     PVector steer = new PVector(0, 0, 0);
     int count = 0;
     // For every boid in the system, check if it's too close
     for (Boid other : boids) {
-      float d = this.distance(other);
+      float d = PVector.dist(position, other.position);
       // If the distance is greater than 0 and less than an arbitrary amount (0 when you are yourself)
       if ((d > 0) && (d < desiredseparation)) {
         // Calculate vector pointing away from neighbor
@@ -176,15 +174,14 @@ class Boid {
   // Alignment
   // For every nearby boid in the system, calculate the average velocity
   PVector align (ArrayList<Boid> boids) {
-    float neighbordist = disInteract;
+    float neighbordist = 50;
     PVector sum = new PVector(0, 0);
     int count = 0;
     for (Boid other : boids) {
-      float d = this.distance(other);
+      float d = PVector.dist(position, other.position);
       if ((d > 0) && (d < neighbordist)) {
         sum.add(other.velocity);
         count++;
-        
       }
     }
     if (count > 0) {
@@ -208,11 +205,11 @@ class Boid {
   // Cohesion
   // For the average position (i.e. center) of all nearby boids, calculate steering vector towards that position
   PVector cohesion (ArrayList<Boid> boids) {
-    float neighbordist = disInteract;
+    float neighbordist = 50;
     PVector sum = new PVector(0, 0);   // Start with empty vector to accumulate all positions
     int count = 0;
     for (Boid other : boids) {
-      float d = this.distance(other);
+      float d = PVector.dist(position, other.position);
       if ((d > 0) && (d < neighbordist)) {
         sum.add(other.position); // Add position
         count++;
@@ -226,71 +223,58 @@ class Boid {
       return new PVector(0, 0);
     }
   }
-  /*
-  void coreBoid(ArrayList<Boid> boids){
-    float neighbordist = disNeighbor;
-    this.neighbors = new ArrayList<Boid>();
+  
+  void grouping(ArrayList<Boid> boids) {
+    float neighbordist = 70;
+    int min = 0;
+    int count=0;
+    ArrayList<Integer> neighbours = new ArrayList<>();
     for (Boid other : boids) {
-      float d = this.distance(other);
-      if ((d > 0) && (d <= neighbordist)) {
-        this.neighbors.add(other);
+      float d = PVector.dist(position, other.position);
+      if ((d > 0) && (d < neighbordist)) {
+        neighbours.add(other.index);
+        if (count==0) {
+          min = other.group;
+          count++;
+        } else { 
+          if (min > other.group) {
+            min = other.group;
+          }
+        }
+      if (min < index) {
+        group = min;
+        for (int i : neighbours) {
+          flock.groups.remove(boids.get(i).group);
+          boids.get(i).group = min;
+        }
+      } else {
+        for (int i : neighbours) {
+          flock.groups.remove(boids.get(i).group);
+          boids.get(i).group = index;
+        }
       }
-    }
-  }
-  */
-
-  void propagateGroup(int g){
-    this.newGroup = g;
-    for (Boid neighbor : this.neighbors){
-      if (neighbor.neighbors.size() >= nMin && neighbor.newGroup == 0){
-        neighbor.propagateGroup(g);
+      flock.groups.add(group);
       }
     }
   }
   
-  void joinGroup(){
-    Boid nearest = this.neighbors.get(0);
-    float dMin = PVector.dist(this.position, nearest.position);
-    for (Boid other : this.neighbors){
-      float d = this.distance(other);
-      if (d < dMin && nearest.neighbors.size() >= nMin) {
-        d = dMin;
-        nearest = other;
-      }
-    }
-    if (nearest.neighbors.size() >= nMin){
-      this.newGroup = nearest.newGroup;
-    }
-  }
-  
-  float distance(Boid other){
-    PVector vect = new PVector(min(abs(this.position.x - other.position.x), width - abs(this.position.x - other.position.x)), min(abs(this.position.y - other.position.y), height - abs(this.position.y - other.position.y)));
-    return vect.mag();
-  }
-  void searchNeighbours(Boid[][] map){
-    this.neighbors.clear();
+  void searchNeighbour(Boid[][] map){
     int x = (int)position.x;
     int y = (int)position.y;
-    for(int i = -35; i<35; i++){
-      for(int j=-35; j<35; j++){
+    for(int i = -70; i<70; i++){
+      for(int j=-70; j<70; j++){
         if(i==0 && j==0){
-          int X = flock.mod_width(x+i);
-          int Y = flock.mod_height(y+j);
-          if(map[int(X/maillage)][int(Y/maillage)]!= this){
-            this.neighbors.add(map[int(X/maillage)][int(Y/maillage)]);
-          }
         }
         else{
-          if (i*i+j*j < 35*35) {
-            int X = flock.mod_width(x+i);
-            int Y = flock.mod_height(y+j);
-            if(map[int(X/maillage)][int(Y/maillage)]!= null){
-              this.neighbors.add(map[int(X/maillage)][int(Y/maillage)]);
-              //print("1neighbour");
-            }
+          
+          int X = flock.mod_width(x+i);
+          int Y = flock.mod_height(y+j);
+          if(map[X][Y]!= null){
+            int id = map[X][Y].index;
           }
         }
       }
     }
   }
+    
 }
