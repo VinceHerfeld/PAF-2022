@@ -15,19 +15,19 @@ class Flock {
 
   Flock() {
     this.boids = new ArrayList<Boid>(); // Initialize the ArrayList
-    map = new Boid[width][height];
+    map = new Boid[int(width/maillage)+1][int(height/maillage)+1];
     boids = new ArrayList<Boid>(); // Initialize the ArrayList
     groups = new HashSet<>();
     trajectories = new HashMap<ArrayList<Boid>, ArrayList<PVector>>();
   }
   void updateMap(){
-    for (int i=0; i<width;i++){
+    for (int i=0; i<int(width/maillage)+1;i++){
       Arrays.fill(map[i],null);
     }
     for(Boid b : boids){
       int x = (int)b.getX();
       int y = (int)b.getY();
-      map[mod_width(x)][mod_height(y)] = b;
+      map[int(mod_width(x)/maillage)][int(mod_height(y)/maillage)] = b;
     }
   }
   void run(int pause) {
@@ -164,7 +164,7 @@ class Flock {
         fill(200, 200, 200, 150);
       }
       */
-      int value = (this.newBijectGroups[group.get(0).newGroup] +11) % 12;
+      int value = (this.newBijectGroups[group.get(0).newGroup] +nbColors-1) % nbColors;
       fill(colors.get(value).x, colors.get(value).y, colors.get(value).z, 150);
       ellipse(b.x, b.y, 2, 2);
       popMatrix();

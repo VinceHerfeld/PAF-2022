@@ -12,13 +12,16 @@
 Flock flock;
 int pause;
 ArrayList<PVector> colors;
-int nMin = 1;
-int nBoids = 100;
+int nMin = 2;
+int nBoids = 750;
 int disNeighbor = 30;
 int disInteract = 35;
+int maillage = 1; //maillage*maillage pixels par case du tableau map
+//maillage = 2 permet de coloriser les groupes isolés
+int nbColors = 12;
 
 void setup() {
-  size(1500, 800);
+  size(1500, 900);
   colors = new ArrayList<PVector>();
   colors.add(new PVector(255, 0, 0));
   colors.add(new PVector(0, 255, 0));
@@ -30,9 +33,20 @@ void setup() {
   colors.add(new PVector(0, 255, 130));
   colors.add(new PVector(130, 0, 255));
   colors.add(new PVector(255, 0, 130));
+  
   colors.add(new PVector(130, 255, 0));
   colors.add(new PVector(0, 130, 255));
+
+  /*
+  colors.add(new PVector(77, 122, 107));
+  colors.add(new PVector(157, 169, 19));
   
+  colors.add(new PVector(54, 169, 239));
+  colors.add(new PVector(57, 247, 93));
+  colors.add(new PVector(217, 216, 211));
+  colors.add(new PVector(77, 122, 107));
+  colors.add(new PVector(157, 169, 19));
+  */
   flock = new Flock();
   background(0);
     
@@ -43,7 +57,7 @@ void setup() {
   }
   flock.initGroups();
   pause=0;
-  frameRate(30);
+  frameRate(200);
 }
 
 void draw() {
