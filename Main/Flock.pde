@@ -1,11 +1,12 @@
 import java.util.*;
+import java.util.Arrays;
 
 // The Flock (a list of Boid objects)
 import java.util.Map;
 
 class Flock {
   ArrayList<Boid> boids; // An ArrayList for all the boids
-  Map<ArrayList<Boid>, ArrayList<PVector>> trajectories; 
+  Map<Integer, ArrayList<PVector>> trajectories; 
   HashSet<Integer> groups;
   Boid[][] map;
   ArrayList<ArrayList<Boid>> oldGroups, newGroups;
@@ -18,7 +19,7 @@ class Flock {
     map = new Boid[int(width/maillage)+1][int(height/maillage)+1];
     boids = new ArrayList<Boid>(); // Initialize the ArrayList
     groups = new HashSet<>();
-    trajectories = new HashMap<ArrayList<Boid>, ArrayList<PVector>>();
+    trajectories = new HashMap<Integer, ArrayList<PVector>>();
   }
   void updateMap(){
     for (int i=0; i<int(width/maillage)+1;i++){
@@ -30,85 +31,75 @@ class Flock {
       map[int(mod_width(x)/maillage)][int(mod_height(y)/maillage)] = b;
     }
   }
-  void run(int pause) {
-    if (pause==0) {
-      /*
-      for (Boid b : boids){
-        b.searchNeighbours(this.map);
+  void run() {
+    /*
+    for (Boid b : boids){
+      b.searchNeighbours(this.map);
+    }
+    for (Boid b : boids) {
+      b.group = b.index;
+    }
+    groups.clear();
+    for (Boid b : boids) {
+      b.grouping(boids);
+    }
+    */
+    updateMap();
+    for (Boid b : boids) {
+      b.run(boids, this.map);  // Passing the entire list of boids to each boid individually
+    }
+    this.oldBijectGroups = this.newBijectGroups.clone();
+    int g = 1;
+    //print("OK");
+    for (Boid b : boids) {
+      if (b.neighbors.size() >= nMin && b.newGroup == 0) {
+        //print(b.neighbors.size());
+        b.propagateGroup(g);
+        g = g + 1;
       }
-      for (Boid b : boids) {
-        b.group = b.index;
-      }
-      groups.clear();
-      for (Boid b : boids) {
-        b.grouping(boids);
-      }
-      */
-      updateMap();
-      for (Boid b : boids) {
-        b.run(boids, this.map);  // Passing the entire list of boids to each boid individually
-      }
-      this.oldBijectGroups = this.newBijectGroups.clone();
-      int g = 1;
-      //print("OK");
-      for (Boid b : boids) {
-        if (b.neighbors.size() >= nMin && b.newGroup == 0) {
-          //print(b.neighbors.size());
-          b.propagateGroup(g);
-          g = g + 1;
-        }
-      }
-      this.oldGroups = new ArrayList<ArrayList<Boid>>(this.newGroups);
-      this.newGroups.clear();
-      for (int k = 0; k < g; k++){
-        this.newGroups.add(new ArrayList<Boid>());
-      }
-      
-      this.linkedGroups = new int[oldGroups.size()][newGroups.size()];
-  
-      for (Boid b : boids) {
-        if (b.neighbors.size() > 0 && b.newGroup == 0) {
-          b.joinGroup();
-        }
-        this.newGroups.get(b.newGroup).add(b);
-        this.linkedGroups[b.oldGroup][b.newGroup]++; 
-      }
-  
-      this.newBijectGroups = new int[this.newGroups.size()];
-      for (int n = 1; n < this.newGroups.size(); n++){
-        for (int o = 1; o < this.oldGroups.size(); o++){
-          if (this.linkedGroups[o][n] > this.oldGroups.get(o).size() / 2 && this.linkedGroups[o][n] > this.newGroups.get(n).size() / 2){
-            this.newBijectGroups[n] = this.oldBijectGroups[o];
-            break;
-          }
-        }
-        if (this.newBijectGroups[n] == 0){
-          this.newBijectGroups[n] = this.nGroups;
-          this.nGroups++;
-        }
-      }
-      for (Boid b : boids) {
-        b.render(this.newBijectGroups); 
+    }
+    this.oldGroups = new ArrayList<ArrayList<Boid>>(this.newGroups);
+    this.newGroups.clear();
+    for (int k = 0; k < g; k++){
+      this.newGroups.add(new ArrayList<Boid>());
+    }
+    
+    this.linkedGroups = new int[oldGroups.size()][newGroups.size()];
 
+    for (Boid b : boids) {
+      if (b.neighbors.size() > 0 && b.newGroup == 0) {
+        b.joinGroup();
       }
-      checkGroups();
-      //println(" --" + trajectories.keySet());
-      println();
-      int firstGroup=1;
-      for(ArrayList<Boid> gr : newGroups){
-        print("0");
-        findCenter(gr);
-        /*
-        int g_red = boids.get(gr).red;
-        int g_green = boids.get(gr).green;
-        int g_blue = boids.get(gr).blue;
-        */
-        if (firstGroup==0) {
-          for (PVector p : trajectories.get(gr)){
-            renderCenter(p, gr);
-          }
+      this.newGroups.get(b.newGroup).add(b);
+      this.linkedGroups[b.oldGroup][b.newGroup]++; 
+    }
+
+    this.newBijectGroups = new int[this.newGroups.size()];
+    for (int n = 1; n < this.newGroups.size(); n++){
+      for (int o = 1; o < this.oldGroups.size(); o++){
+        if (this.linkedGroups[o][n] > this.oldGroups.get(o).size() / 2 && this.linkedGroups[o][n] > this.newGroups.get(n).size() / 2){
+          this.newBijectGroups[n] = this.oldBijectGroups[o];
+          break;
         }
-        firstGroup =0;
+      }
+      if (this.newBijectGroups[n] == 0){
+        this.newBijectGroups[n] = this.nGroups;
+        this.nGroups++;
+      }
+    }
+    for (Boid b : boids) {
+      b.render(this.newBijectGroups); 
+
+    }
+    checkGroups();
+
+    for(int group = 1 ; group < newGroups.size() ; group++){
+      int gr = newBijectGroups[group];
+
+      findCenter(gr, newGroups.get(group));
+
+      for (PVector p : trajectories.get(gr)){
+         renderCenter(p, gr);
       }
     }
   }
@@ -126,7 +117,7 @@ class Flock {
     this.oldBijectGroups = new int[1];
     this.newBijectGroups = new int[1];
   }
-  void findCenter(ArrayList<Boid> group){
+  void findCenter(int group, ArrayList<Boid> newGroup){
     PVector barycentre = new PVector();
     PVector barycentre2;
     int num = 0;
@@ -134,7 +125,7 @@ class Flock {
     float sin_sumx =0.;
     float cos_sumy =0.;
     float sin_sumy =0.;
-    for (Boid b : group){
+    for (Boid b : newGroup){
       cos_sumx += Math.cos(2*PI*b.position.x/width);
       sin_sumx += Math.sin(2*PI*b.position.x/width);
       cos_sumy += Math.cos(2*PI*b.position.y/height);
@@ -147,8 +138,8 @@ class Flock {
       float barycentery = (float) (height/2/PI*Math.atan2(sin_sumy, cos_sumy)+height)%height;
       barycentre2 = new PVector(barycenterx, barycentery);
       //trajectories.get(group).add(barycentre.div(num));
-      
       trajectories.get(group).add(barycentre2);
+      return;
     }
     else {
       //print("No boids in group : " + group + "\n");
@@ -156,7 +147,7 @@ class Flock {
     }
   }
   
-  void renderCenter(PVector b, ArrayList<Boid> group){
+  void renderCenter(PVector b, int gr){
     if(b != null){
       pushMatrix();
       /*
@@ -164,7 +155,7 @@ class Flock {
         fill(200, 200, 200, 150);
       }
       */
-      int value = (this.newBijectGroups[group.get(0).newGroup] +nbColors-1) % nbColors;
+      int value = (gr +nbColors-1) % nbColors;
       fill(colors.get(value).x, colors.get(value).y, colors.get(value).z, 150);
       ellipse(b.x, b.y, 2, 2);
       popMatrix();
@@ -173,20 +164,28 @@ class Flock {
   }
   
   void checkGroups(){
-    for(ArrayList<Boid> group : newGroups){
+    for(int group : newBijectGroups){
+      //print(group+" ");
       if(!trajectories.containsKey(group)){
         trajectories.put(group, new ArrayList<PVector>());
       }
     }
-    ArrayList<ArrayList<Boid>> removed = new ArrayList<>();
-    for(ArrayList<Boid> group : trajectories.keySet()){
-      if(!newGroups.contains(group)){
-        removed.add(group);
+    /*
+    int present = 0;
+    for(int group : trajectories.keySet()){
+      //print(group, " : ");
+      for (int g : newBijectGroups) {
+        if (g==group) {
+          present = 1;
+        }
+        if (present==0) {
+          trajectories.remove(group);
+        }
       }
     }
-    for (ArrayList<Boid> i : removed) {
-      trajectories.remove(i);
-    }
+    */
+    
+    
   }
   
   
