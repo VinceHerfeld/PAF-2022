@@ -47,7 +47,6 @@ void setup() {
   colors.add(new PVector(0, 255, 130));
   colors.add(new PVector(130, 0, 255));
   colors.add(new PVector(255, 0, 130));
-  
   colors.add(new PVector(130, 255, 0));
   colors.add(new PVector(0, 130, 255));
   colors.add(new PVector(0, 130, 0));
@@ -68,9 +67,12 @@ void setup() {
   background(0);
     
   // Add an initial set of boids into the system
-  for (int i = 0; i < nBoids; i++) {
-    flock.addBoid(new Boid(random(width), random(height)));
+  for (int i = 0; i < nBoids/2; i++) {
+    flock.addBoid(new Boid(width/4, 3*height/4, 0));
     //flock.addBoid(new Boid(width/2, height/2));
+  }
+  for(int i=nBoids/2; i< nBoids; i++){
+        flock.addBoid(new Boid(3*width/4, 3*height/4, 1));
   }
   flock.initGroups();
   frameRate(60);

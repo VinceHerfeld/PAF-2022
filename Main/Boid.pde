@@ -17,8 +17,13 @@ class Boid {
   int group;
   int index;
 
-  Boid(float x, float y) {
-    acceleration = new PVector(0, 0);
+  Boid(float x, float y, int group) {
+    if(group==0){
+      acceleration = new PVector(1, -1);
+    }
+    else if(group==1){
+      acceleration = new PVector(-1, -1);
+    }
 
     // This is a new PVector method not yet implemented in JS
     // velocity = PVector.random2D();
