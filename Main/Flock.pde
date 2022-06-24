@@ -136,7 +136,7 @@ class Flock {
     if (num > 0){
       float barycenterx = (float) (width/2/PI*Math.atan2(sin_sumx, cos_sumx)+width)%width;
       float barycentery = (float) (height/2/PI*Math.atan2(sin_sumy, cos_sumy)+height)%height;
-      barycentre2 = new PVector(barycenterx, barycentery);
+      barycentre2 = new PVector(barycenterx, barycentery, newGroup.size());
       //trajectories.get(group).add(barycentre.div(num));
       trajectories.get(group).add(barycentre2);
       return;
@@ -157,7 +157,7 @@ class Flock {
       */
       int value = (gr +nbColors-1) % nbColors;
       fill(colors.get(value).x, colors.get(value).y, colors.get(value).z, 150);
-      ellipse(b.x, b.y, 2, 2);
+      ellipse(b.x, b.y, 1+ 2*log(b.z), 1+ 2*log(b.z));
       popMatrix();
     }
     

@@ -20,6 +20,9 @@ int maillage = 1; //maillage*maillage pixels par case du tableau map
 //maillage = 2 permet de coloriser les groupes isolés
 int nbColors = 12;
 int tour =0;
+boolean saved = false;
+String DEL = ";";
+String SEP = "\n";
 
 
 void setup() {
@@ -84,6 +87,9 @@ void draw() {
     background(20);
     flock.run();
   }
+   else if(!saved){
+    saveToCSV();
+  }
 }
 
 // Add a new boid into the System
@@ -93,4 +99,35 @@ void mousePressed() {
 }*/
 void mousePressed() {
   pause = 1-pause;
+}
+
+void saveToCSV(){
+  Map<Integer, ArrayList<PVector>> traj = flock.trajectories;
+  saved = true;
+  try {
+    PrintWriter file = createWriter("./traj.csv");
+    for(int g : traj.keySet()){
+      file.print(String.valueOf(g));
+      file.print(DEL);
+      ArrayList<Float> Y = new ArrayList<Float>();
+      for(PVector b : traj.get(g)){
+        Y.add(b.y);
+        file.print(String.valueOf(b.x).replace(".", ","));
+        file.print(DEL);
+      }
+      file.print(SEP);
+      file.print(" ");
+      file.print(DEL);
+      for(float y : Y){
+        file.print(String.valueOf(height - y).replace(".", ","));
+        file.print(DEL);
+      }
+      file.print(SEP);
+      file.print(SEP);
+    }
+    file.close();
+  }
+  catch(Exception e) {
+    print("Couldn't export trajectories\n" + e);
+  }
 }
