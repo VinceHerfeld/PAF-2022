@@ -6,6 +6,4 @@ layers (ie : ne pas redessiner tous les barycentres précédents à chaque frame
 
 Sortie du cadre de tous les groupes est consignée (position absolue, on garde deux positions), on retient les moments
 
-Coder des obstacles
-
 Attendre un certain temps avant de supprimer les groupes en fusion ou en séparation
