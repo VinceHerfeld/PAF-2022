@@ -11,9 +11,11 @@
 
 Flock flock;
 int pause = 0;
+PGraphics tails;
 ArrayList<PVector> colors;
 int nMin = 2;
 int nBoids = 150;
+int nObst = 3;
 int disNeighbor = 30;
 int disInteract = 35;
 int maillage = 1; //maillage*maillage pixels par case du tableau map
@@ -70,6 +72,10 @@ void setup() {
   background(0);
     
   // Add an initial set of boids into the system
+  for(int i = 0; i < nObst; i++){
+    flock.addObstacle(new Obstacle(flock, (int) random(width), (int)random(height), (int) random(10)));
+  }
+  
   for (int i = 0; i < nBoids/2; i++) {
     flock.addBoid(new Boid(width/4, 3*height/4, 0));
     //flock.addBoid(new Boid(width/2, height/2));
@@ -83,7 +89,7 @@ void setup() {
 
 void draw() {
   if (pause==0){
-    tour ++;
+    tour = (tour + 1) % 100;
     background(20);
     flock.run();
   }
@@ -99,6 +105,15 @@ void mousePressed() {
 }*/
 void mousePressed() {
   pause = 1-pause;
+}
+
+void keyPressed(){
+  if(key == 'p'){
+    flock.addObstacle(new Obstacle(flock, mouseX, mouseY, 5));
+  }
+  if (key == 'r'){
+    setup();
+  }
 }
 
 void saveToCSV(){

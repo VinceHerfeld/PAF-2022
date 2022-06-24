@@ -6,10 +6,12 @@ import java.util.Map;
 
 class Flock {
   ArrayList<Boid> boids; // An ArrayList for all the boids
+  ArrayList<Obstacle> obstacles;
   Map<Integer, ArrayList<PVector>> trajectories; 
   HashSet<Integer> groups;
   Boid[][] map;
   ArrayList<ArrayList<Boid>> oldGroups, newGroups;
+  
   int[][] linkedGroups;
   int nGroups;
   int[] oldBijectGroups, newBijectGroups;
@@ -17,7 +19,7 @@ class Flock {
   Flock() {
     this.boids = new ArrayList<Boid>(); // Initialize the ArrayList
     map = new Boid[int(width/maillage)+1][int(height/maillage)+1];
-    boids = new ArrayList<Boid>(); // Initialize the ArrayList
+    this.obstacles = new ArrayList<Obstacle>();
     groups = new HashSet<>();
     trajectories = new HashMap<Integer, ArrayList<PVector>>();
   }
@@ -30,6 +32,12 @@ class Flock {
       int y = (int)b.getY();
       map[int(mod_width(x)/maillage)][int(mod_height(y)/maillage)] = b;
     }
+    /*
+    for(Obstacle o : obstacles){
+      int x = (int)o.getX();
+      int y = (int)o.getY();
+      map[int(mod_width(x)/maillage)][int(mod_height(y)/maillage)] = o;
+    }*/ 
   }
   void run() {
     /*
@@ -45,8 +53,11 @@ class Flock {
     }
     */
     updateMap();
+    for (Obstacle o : obstacles){
+      o.run();
+    }
     for (Boid b : boids) {
-      b.run(boids, this.map);  // Passing the entire list of boids to each boid individually
+      b.run(this.map);  // Passing the entire list of boids to each boid individually
     }
     this.oldBijectGroups = this.newBijectGroups.clone();
     int g = 1;
@@ -107,6 +118,11 @@ class Flock {
   void addBoid(Boid b) {
     this.boids.add(b);
   }
+  
+  void addObstacle(Obstacle o) {
+    this.obstacles.add(o);
+  }
+  
   
   void initGroups(){
     this.oldGroups = new ArrayList<ArrayList<Boid>>();

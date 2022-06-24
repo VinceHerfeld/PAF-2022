@@ -16,7 +16,10 @@ class Boid {
   int blue;
   int group;
   int index;
-
+  int numNeigh;
+  
+  Boid () {}
+  
   Boid(float x, float y, int group) {
     if(group==0){
       acceleration = new PVector(1, -1);
@@ -42,11 +45,14 @@ class Boid {
     this.neighbors = new ArrayList<Boid>();
     }
 
-  void run(ArrayList<Boid> boids, Boid [][] map) {
+  void run(Boid [][] map) {
     this.oldGroup = newGroup;
     this.newGroup = 0;
-    flock(boids);
-    searchNeighbours(map);
+    this.neighbors = searchNeighbours(map, 35);
+    this.numNeigh = neighbors.size();
+    if(numNeigh > 0){
+      flock(neighbors);
+    }
     update();
     borders();
   }
@@ -102,7 +108,7 @@ class Boid {
 
   void render(int[] biject) {
     // Draw a triangle rotated in the direction of velocity
-    float theta = velocity.heading2D() + radians(90);
+    float theta = velocity.heading() + radians(90);
     // heading2D() above is now heading() but leaving old syntax until Processing.js catches up
     if (this.newGroup == 0){
       fill(200, 200, 200);
@@ -181,56 +187,34 @@ class Boid {
   // Alignment
   // For every nearby boid in the system, calculate the average velocity
   PVector align (ArrayList<Boid> boids) {
-    float neighbordist = disInteract;
     PVector sum = new PVector(0, 0);
-    int count = 0;
     for (Boid other : boids) {
-      float d = this.distance(other);
-      if ((d > 0) && (d < neighbordist)) {
-        sum.add(other.velocity);
-        count++;
-        
-      }
+      sum.add(other.velocity);
     }
-    if (count > 0) {
-      sum.div((float)count);
-      // First two lines of code below could be condensed with new PVector setMag() method
-      // Not using this method until Processing.js catches up
-      // sum.setMag(maxspeed);
+    //sum.div((float) this.numNeigh);
+    // First two lines of code below could be condensed with new PVector setMag() method
+    // Not using this method until Processing.js catches up
+    // sum.setMag(maxspeed);
 
-      // Implement Reynolds: Steering = Desired - Velocity
-      sum.normalize();
-      sum.mult(maxspeed);
-      PVector steer = PVector.sub(sum, velocity);
-      steer.limit(maxforce);
-      return steer;
-    } 
-    else {
-      return new PVector(0, 0);
-    }
+    // Implement Reynolds: Steering = Desired - Velocity
+    sum.normalize();
+    sum.mult(maxspeed);
+    PVector steer = PVector.sub(sum, velocity);
+    steer.limit(maxforce);
+    return steer;
   }
 
   // Cohesion
   // For the average position (i.e. center) of all nearby boids, calculate steering vector towards that position
   PVector cohesion (ArrayList<Boid> boids) {
-    float neighbordist = disInteract;
     PVector sum = new PVector(0, 0);   // Start with empty vector to accumulate all positions
-    int count = 0;
     for (Boid other : boids) {
-      float d = this.distance(other);
-      if ((d > 0) && (d < neighbordist)) {
-        sum.add(other.position); // Add position
-        count++;
-      }
+      sum.add(other.position); // Add position
     }
-    if (count > 0) {
-      sum.div(count);
-      return seek(sum);  // Steer towards the position
-    } 
-    else {
-      return new PVector(0, 0);
-    }
+    sum.div(this.numNeigh);
+    return seek(sum);  // Steer towards the position
   }
+  
   /*
   void coreBoid(ArrayList<Boid> boids){
     float neighbordist = disNeighbor;
@@ -272,30 +256,33 @@ class Boid {
     PVector vect = new PVector(min(abs(this.position.x - other.position.x), width - abs(this.position.x - other.position.x)), min(abs(this.position.y - other.position.y), height - abs(this.position.y - other.position.y)));
     return vect.mag();
   }
-  void searchNeighbours(Boid[][] map){
-    this.neighbors.clear();
+  
+  ArrayList<Boid> searchNeighbours(Boid[][] map, int eyeSight){
+    ArrayList<Boid> neigh = new ArrayList<Boid>();
     int x = (int)position.x;
     int y = (int)position.y;
-    for(int i = -35; i<35; i++){
-      for(int j=-35; j<35; j++){
+    for(int i = -eyeSight; i<eyeSight; i++){
+      for(int j=-eyeSight; j<eyeSight; j++){
         if(i==0 && j==0){
           int X = flock.mod_width(x+i);
           int Y = flock.mod_height(y+j);
           if(map[int(X/maillage)][int(Y/maillage)]!= this){
-            this.neighbors.add(map[int(X/maillage)][int(Y/maillage)]);
+            neigh.add(map[int(X/maillage)][int(Y/maillage)]);
           }
         }
         else{
-          if (i*i+j*j < 35*35) {
+          if (i*i+j*j < eyeSight*eyeSight) {
             int X = flock.mod_width(x+i);
             int Y = flock.mod_height(y+j);
             if(map[int(X/maillage)][int(Y/maillage)]!= null){
-              this.neighbors.add(map[int(X/maillage)][int(Y/maillage)]);
+              neigh.add(map[int(X/maillage)][int(Y/maillage)]);
               //print("1neighbour");
             }
           }
         }
       }
     }
+    return neigh;
   }
+  
 }
