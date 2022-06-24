@@ -25,6 +25,7 @@ int tour =0;
 boolean saved = false;
 String DEL = ";";
 String SEP = "\n";
+boolean erase = true;
 
 
 void setup() {
@@ -84,12 +85,15 @@ void setup() {
         flock.addBoid(new Boid(3*width/4, 3*height/4, 1));
   }
   flock.initGroups();
-  frameRate(60);
+  frameRate(20);
 }
 
 void draw() {
   if (pause==0){
     tour = (tour + 1) % 100;
+    if (tour == 30){
+      erase = false;
+    }
     background(20);
     flock.run();
   }

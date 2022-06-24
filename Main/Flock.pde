@@ -186,22 +186,27 @@ class Flock {
         trajectories.put(group, new ArrayList<PVector>());
       }
     }
-    /*
-    int present = 0;
-    for(int group : trajectories.keySet()){
-      //print(group, " : ");
-      for (int g : newBijectGroups) {
-        if (g==group) {
-          present = 1;
+    if(tour < 30 & erase){
+      int present = 0;
+      ArrayList<Integer> contains = new ArrayList<Integer>();
+      for(int group : trajectories.keySet()){
+        present = 0;
+        //print(group, " : ");
+        for (int g : newBijectGroups) {
+          if (g == group) {
+            present = 1;
+            break;
+          }
         }
         if (present==0) {
-          trajectories.remove(group);
+            contains.add(group);
         }
       }
+      for(int g : contains){
+        trajectories.remove(g);
+      }
+      print(tour);
     }
-    */
-    
-    
   }
   
   
