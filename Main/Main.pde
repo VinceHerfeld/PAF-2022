@@ -23,6 +23,7 @@ int maillage = 1; //maillage*maillage pixels par case du tableau map
 int nbColors = 12;
 int tour =0;
 boolean saved = false;
+boolean show = false;
 String DEL = ";";
 String SEP = "\n";
 boolean erase = true;
@@ -85,7 +86,7 @@ void setup() {
         flock.addBoid(new Boid(3*width/4, 3*height/4, 1));
   }
   flock.initGroups();
-  frameRate(20);
+  frameRate(60);
 }
 
 void draw() {
@@ -117,6 +118,9 @@ void keyPressed(){
   }
   if (key == 'r'){
     setup();
+  }
+  if(key == 't'){
+    show = !show;
   }
 }
 

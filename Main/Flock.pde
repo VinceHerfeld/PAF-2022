@@ -11,6 +11,7 @@ class Flock {
   HashSet<Integer> groups;
   Boid[][] map;
   ArrayList<ArrayList<Boid>> oldGroups, newGroups;
+  Map<Integer, PVector> groupVectors;
   
   int[][] linkedGroups;
   int nGroups;
@@ -18,10 +19,11 @@ class Flock {
 
   Flock() {
     this.boids = new ArrayList<Boid>(); // Initialize the ArrayList
-    map = new Boid[int(width/maillage)+1][int(height/maillage)+1];
+    this.map = new Boid[int(width/maillage)+1][int(height/maillage)+1];
     this.obstacles = new ArrayList<Obstacle>();
-    groups = new HashSet<>();
-    trajectories = new HashMap<Integer, ArrayList<PVector>>();
+    this.groups = new HashSet<>();
+    this.trajectories = new HashMap<Integer, ArrayList<PVector>>();
+    this.groupVectors = new HashMap<Integer, PVector>();
   }
   void updateMap(){
     for (int i=0; i<int(width/maillage)+1;i++){
@@ -108,9 +110,16 @@ class Flock {
       int gr = newBijectGroups[group];
 
       findCenter(gr, newGroups.get(group));
-
-      for (PVector p : trajectories.get(gr)){
-         renderCenter(p, gr);
+      groupVectors = new HashMap<Integer, PVector>();
+      findGroupVect(gr, newGroups.get(group));
+      if(show){
+        for (PVector p : trajectories.get(gr)){
+           renderCenter(p, gr);
+        }
+        if(groupVectors.get(gr) != null){
+          PVector b = trajectories.get(gr).get(trajectories.get(gr).size() - 1);
+          drawVect((int) b.x, (int) b.y, 100, groupVectors.get(gr).heading());
+        }
       }
     }
   }
@@ -205,10 +214,35 @@ class Flock {
       for(int g : contains){
         trajectories.remove(g);
       }
-      print(tour);
+      //print(tour);
     }
   }
   
+  void findGroupVect(int group, ArrayList<Boid> newGroup){
+    ArrayList<PVector> traj = trajectories.get(group);
+    int size = traj.size();
+    PVector vect = null;
+    groupVectors.put(group, vect);
+    if (size > 10){
+      PVector b2 = trajectories.get(group).get(size - 1);
+      PVector b1 = trajectories.get(group).get(size - 11);
+      vect = PVector.sub(b2, b1);
+      vect.mult(newGroup.size()); 
+    }
+    groupVectors.replace(group, vect);
+  }
+  
+  void drawVect(int bx, int by, int len, float angle){
+    pushMatrix();
+    stroke(255);
+    translate(bx, by);
+    rotate(angle);
+    line(0,0,len, 0);
+    line(len, 0, len - 8, -8);
+    line(len, 0, len - 8, 8);
+    noStroke();
+    popMatrix();
+  }
   
   
   

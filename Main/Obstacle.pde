@@ -13,9 +13,25 @@ class Obstacle{
   }
   
   void run(){
-    this.neighbors = searchNeighbours(flock.map, forceAmp * 10);
+    this.neighbors = searchNeighbours(flock.map, forceAmp * 30);
     for(Boid b : neighbors){
       PVector force = new PVector(b.position.x - this.position.x, b.position.y - this.position.y);
+      float d = force.mag();
+      force.normalize();
+      force.div(2 * d);
+      
+      if(b.position.x <= this.position.x & b.position.y <= this.position.y){
+        force.rotate(-HALF_PI / 3);
+      }
+      else if (b.position.x > this.position.x & b.position.y <= this.position.y){
+        force.rotate(HALF_PI / 3);
+      }
+      else if (b.position.x > this.position.x & b.position.y > this.position.y){
+        force.rotate(-HALF_PI / 3);
+      }
+      else if (b.position.x <= this.position.x & b.position.y > this.position.y){
+        force.rotate(HALF_PI / 3);
+      }
       b.applyForce(force.mult(forceAmp));
     }
     render();
@@ -24,7 +40,7 @@ class Obstacle{
   void render(){
     pushMatrix();
     fill(255);
-    ellipse(position.x, position.y, 30,30);
+    ellipse(position.x, position.y, 30, 30);
     if(forceAmp <= 3){
       fill(0,200,0);
     }
