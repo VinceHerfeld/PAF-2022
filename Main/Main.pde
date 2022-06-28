@@ -95,7 +95,8 @@ void draw() {
     if (tour == 30){
       erase = false;
     }
-    background(20);
+    //background(60);
+    background(0,255,0);
     flock.run();
   }
    else if(!saved){

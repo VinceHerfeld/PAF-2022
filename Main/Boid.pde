@@ -17,6 +17,7 @@ class Boid {
   int group;
   int index;
   int numNeigh;
+  boolean inObstacle = false;
   
   Boid () {}
   

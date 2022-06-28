@@ -63,10 +63,8 @@ class Flock {
     }
     this.oldBijectGroups = this.newBijectGroups.clone();
     int g = 1;
-    //print("OK");
     for (Boid b : boids) {
       if (b.neighbors.size() >= nMin && b.newGroup == 0) {
-        //print(b.neighbors.size());
         b.propagateGroup(g);
         g = g + 1;
       }
@@ -167,7 +165,6 @@ class Flock {
       return;
     }
     else {
-      //print("No boids in group : " + group + "\n");
       return;
     }
   }
@@ -190,9 +187,12 @@ class Flock {
   
   void checkGroups(){
     for(int group : newBijectGroups){
-      //print(group+" ");
       if(!trajectories.containsKey(group)){
-        trajectories.put(group, new ArrayList<PVector>());
+        ArrayList<PVector> time = new ArrayList<PVector>();
+        for(int i = 0; i < frameCount - 30; i++){
+          time.add(new PVector(-10, height + 10));
+        }
+        trajectories.put(group, time);
       }
     }
     if(tour < 30 & erase){
@@ -200,7 +200,6 @@ class Flock {
       ArrayList<Integer> contains = new ArrayList<Integer>();
       for(int group : trajectories.keySet()){
         present = 0;
-        //print(group, " : ");
         for (int g : newBijectGroups) {
           if (g == group) {
             present = 1;
@@ -214,7 +213,6 @@ class Flock {
       for(int g : contains){
         trajectories.remove(g);
       }
-      //print(tour);
     }
   }
   

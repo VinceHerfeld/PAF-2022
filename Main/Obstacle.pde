@@ -4,12 +4,14 @@ class Obstacle{
   ArrayList<Boid> neighbors;
   Flock flock;
   int minDist = 50;
+  Map<Integer, PVector> groupVectors;
   
   Obstacle(Flock flock, int x, int y, int forceAmp){
     this.position = new PVector(x,y);
     this.forceAmp = forceAmp;
     this.neighbors = new ArrayList<Boid>();
     this.flock = flock ;
+    this.groupVectors = new HashMap<Integer,PVector>();
   }
   
   void run(){
@@ -33,7 +35,24 @@ class Obstacle{
         force.rotate(HALF_PI / 3);
       }
       b.applyForce(force.mult(forceAmp));
+      
+/*       TO BE CONTINUED      
+      int group = flock.newBijectGroups[b.newGroup];
+      if(flock.groupVectors.get(group) == null){
+        this.groupVectors.put(group, new PVector(0,0));
+      }
+      else if(!b.inObstacle){
+        b.inObstacle = true;
+        PVector vect = flock.groupVectors.get(group).copy();
+        this.groupVectors.put(group, vect);
+      }
+      print(this.groupVectors);
+      print(group + "\n----------------------\n");
+      b.applyForce(this.groupVectors.get(group).mult(10));
+ */
+ 
     }
+    
     render();
   }
   
