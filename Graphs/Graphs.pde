@@ -7,8 +7,8 @@ Set<Integer> groups;
 ArrayList<PVector> colors;
 int nbColors = 12;
 
-int startFrame = 600;
-int endFrame = 2000;
+int startFrame =40;
+int endFrame = 50;
 
 
 

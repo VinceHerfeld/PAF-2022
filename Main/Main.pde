@@ -13,6 +13,7 @@ Flock flock;
 int pause = 0;
 PGraphics tails;
 ArrayList<PVector> colors;
+int newObsForce = 5;
 int nMin = 2;
 int nBoids = 150;
 int nObst = 3;
@@ -75,7 +76,7 @@ void setup() {
     
   // Add an initial set of boids into the system
   for(int i = 0; i < nObst; i++){
-    flock.addObstacle(new Obstacle(flock, (int) random(width), (int)random(height), (int) random(10)));
+    flock.addObstacle(new Obstacle(flock, (int) random(width), (int)random(height), (int) random(1,10)));
   }
   
   for (int i = 0; i < nBoids/2; i++) {
@@ -91,15 +92,17 @@ void setup() {
 
 void draw() {
   if (pause==0){
+    saved = false;
     tour = (tour + 1) % 100;
     if (tour == 30){
       erase = false;
     }
     //background(60);
-    background(0,255,0);
+    background(60);
     flock.run();
   }
-   else if(!saved){
+  else if(!saved){
+    saved = true;
     saveToCSV();
   }
 }
@@ -115,7 +118,7 @@ void mousePressed() {
 
 void keyPressed(){
   if(key == 'p'){
-    flock.addObstacle(new Obstacle(flock, mouseX, mouseY, 5));
+    flock.addObstacle(new Obstacle(flock, mouseX, mouseY, newObsForce));
   }
   if (key == 'r'){
     setup();
