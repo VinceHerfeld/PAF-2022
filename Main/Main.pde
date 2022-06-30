@@ -1,28 +1,29 @@
-/**
- * Flocking 
- * by Daniel Shiffman.  
- * 
- * An implementation of Craig Reynold's Boids program to simulate
- * the flocking behavior of birds. Each boid steers itself based on 
- * rules of avoidance, alignment, and coherence.
- * 
- * Click the mouse to add a new boid.
- */
-
 Flock flock;
 int pause = 0;
-PGraphics tails;
-ArrayList<PVector> colors;
-int newObsForce = 5;
-int nMin = 2;
+
+/*
+  Paramètres globaux
+*/
+
 int nBoids = 150;
-int nObst = 3;
+int nObst = 0;
+int frame = 30;
+int nMin = 2;
+
+int position = 2;
+
+int newObsForce = 5;
 int disNeighbor = 30;
 int disInteract = 35;
 int maillage = 1; //maillage*maillage pixels par case du tableau map
 //maillage = 2 permet de coloriser les groupes isolés
 int nbColors = 12;
 int tour =0;
+
+
+
+PGraphics tails;
+ArrayList<PVector> colors;
 boolean saved = false;
 boolean show = false;
 String DEL = ";";
@@ -78,16 +79,56 @@ void setup() {
   for(int i = 0; i < nObst; i++){
     flock.addObstacle(new Obstacle(flock, (int) random(width), (int)random(height), (int) random(1,10)));
   }
-  
-  for (int i = 0; i < nBoids/2; i++) {
-    flock.addBoid(new Boid(width/4, 3*height/4, 0));
-    //flock.addBoid(new Boid(width/2, height/2));
+  float directionX;
+  float directionY;
+  switch(position){
+    case 0:
+      for (int i = 0; i < nBoids/2; i++) {
+        flock.addBoid(new Boid(random(width), random(height)));
+        //flock.addBoid(new Boid(width/2, height/2));
+      }
+      break;
+      
+    case 1:
+       directionX = 1;
+       directionY = -1;
+       for (int i = 0; i < nBoids/2; i++) {
+         flock.addBoid(new Boid(width/4, 3*height/4, directionX, directionY));
+       }
+       directionX = -1;
+       directionY = -1;
+      for(int i=nBoids/2; i< nBoids; i++){
+         flock.addBoid(new Boid(3*width/4, 3*height/4, directionX, directionY));
+       }
+       break;
+     
+     case 2:
+       directionX = random(-1,1);
+       directionY = random(-1,1);
+       for (int i = 0; i < nBoids/4; i++) {
+         flock.addBoid(new Boid(width/4, height/4, directionX, directionY));
+       }
+       directionX = random(-1,1);
+       directionY = random(-1,1);
+       for(int i=nBoids/4; i< nBoids/2; i++){
+         flock.addBoid(new Boid(3*width/4, 3*height/4, directionX, directionY));
+       }
+       directionX = random(-1,1);
+       directionY = random(-1,1);
+       for (int i = nBoids/2; i < 3*nBoids/4; i++) {
+         flock.addBoid(new Boid(width/4, 3*height/4, directionX, directionY));
+       }
+       directionX = random(-1,1);
+       directionY = random(-1,1);
+       for(int i=3*nBoids/4; i< nBoids; i++){
+         flock.addBoid(new Boid(3*width/4, height/4, directionX, directionY));
+       }
+       break;
+         
   }
-  for(int i=nBoids/2; i< nBoids; i++){
-        flock.addBoid(new Boid(3*width/4, 3*height/4, 1));
-  }
+
   flock.initGroups();
-  frameRate(60);
+  frameRate(frame);
 }
 
 void draw() {
