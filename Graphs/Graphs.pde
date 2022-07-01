@@ -7,29 +7,35 @@ Set<Integer> groups;
 ArrayList<PVector> colors;
 int nbColors = 12;
 
-int startFrame =40;
-int endFrame = 50;
+int startFrame =150;
+int endFrame = 200;
+int WIDTH = 1500;
+int HEIGHT = 900;
+String path = "../Trajectories/file.csv";
 
 
 
 void setup(){
   size(1500, 900);
-  table = loadStrings("../Main/traj.csv");
   trajectories = new HashMap();
-  //ArrayList<Integer> Xr;
-  //ArrayList<Integer> Yr;
-  
-  for(int i = 0; i < table.length; i++){
-    ArrayList<String> c = new ArrayList(Arrays.asList(table[i].split(";")));
-    if(!c.get(0).equals("") & !c.get(0).equals(" ") & c.get(0) != null){
-      int group = Integer.parseInt(c.get(0));
-      trajectories.put(group, new ArrayList<PVector>());
-      ArrayList<String> c2 = new ArrayList(Arrays.asList(table[i+1].split(";")));
-      for(int j = 1; j < c.size(); j++){
-        trajectories.get(group).add(new PVector(Float.valueOf(c.get(j).replace(",", ".")).floatValue(), height - Float.valueOf(c2.get(j).replace(",", ".")).floatValue()));
+  try{
+    table = loadStrings(path);
+    for(int i = 0; i < table.length; i++){
+      ArrayList<String> c = new ArrayList(Arrays.asList(table[i].split(";")));
+      if(!c.get(0).equals("") & !c.get(0).equals(" ") & c.get(0) != null){
+        int group = Integer.parseInt(c.get(0));
+        trajectories.put(group, new ArrayList<PVector>());
+        ArrayList<String> c2 = new ArrayList(Arrays.asList(table[i+1].split(";")));
+        for(int j = 1; j < c.size(); j++){
+          trajectories.get(group).add(new PVector(Float.valueOf(c.get(j).replace(",", ".")).floatValue(), height - Float.valueOf(c2.get(j).replace(",", ".")).floatValue()));
+        }
       }
     }
   }
+  catch(Exception e){
+    exit();
+  }
+  
   trajectories.remove(0);
   groups = trajectories.keySet();
   colors = new ArrayList<PVector>();
@@ -49,8 +55,6 @@ void setup(){
   colors.add(new PVector(0, 130, 0));
   colors.add(new PVector(130, 0, 0));
   colors.add(new PVector(0, 0, 130));
-  
-  
 }
 
 void draw(){
