@@ -21,19 +21,36 @@ class Boid {
   
   Boid () {}
   
-  Boid(float x, float y, int group) {
-    if(group==0){
-      acceleration = new PVector(1, -1);
+  Boid(float x, float y, float directionX, float directionY) {
+
+    acceleration = new PVector(directionX, directionY);
+    velocity = new PVector(directionX, directionY);
+
+    // This is a new PVector method not yet implemented in JS
+    // velocity = PVector.random2D();
+
+    // Leaving the code temporarily this way so that this example runs in JS
+    //float angle = random(TWO_PI);
+    //velocity = new PVector(cos(angle), sin(angle));
+
+    position = new PVector(x, y);
+    r = 4.0;
+    maxspeed = 2;
+    maxforce = 0.03;
+    
+    this.oldGroup = 0;
+    this.newGroup = 0;
+    this.neighbors = new ArrayList<Boid>();
     }
-    else if(group==1){
-      acceleration = new PVector(-1, -1);
-    }
+    
+    Boid(float x, float y) {
 
     // This is a new PVector method not yet implemented in JS
     // velocity = PVector.random2D();
 
     // Leaving the code temporarily this way so that this example runs in JS
     float angle = random(TWO_PI);
+    acceleration = new PVector(cos(angle), sin(angle));
     velocity = new PVector(cos(angle), sin(angle));
 
     position = new PVector(x, y);
@@ -45,6 +62,7 @@ class Boid {
     this.newGroup = 0;
     this.neighbors = new ArrayList<Boid>();
     }
+    
 
   void run(Boid [][] map) {
     this.oldGroup = newGroup;
@@ -69,7 +87,7 @@ class Boid {
     PVector ali = align(boids);      // Alignment
     PVector coh = cohesion(boids);   // Cohesion
     // Arbitrarily weight these forces
-    sep.mult(3.0);
+    sep.mult(2.0);
     ali.mult(1.0);
     coh.mult(1.0);
     // Add the force vectors to acceleration
@@ -215,19 +233,6 @@ class Boid {
     sum.div(this.numNeigh);
     return seek(sum);  // Steer towards the position
   }
-  
-  /*
-  void coreBoid(ArrayList<Boid> boids){
-    float neighbordist = disNeighbor;
-    this.neighbors = new ArrayList<Boid>();
-    for (Boid other : boids) {
-      float d = this.distance(other);
-      if ((d > 0) && (d <= neighbordist)) {
-        this.neighbors.add(other);
-      }
-    }
-  }
-  */
 
   void propagateGroup(int g){
     this.newGroup = g;
