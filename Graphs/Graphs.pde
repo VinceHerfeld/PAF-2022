@@ -9,14 +9,12 @@ int nbColors = 12;
 
 int startFrame =150;
 int endFrame = 200;
-int WIDTH = 1500;
-int HEIGHT = 900;
-String path = "../Trajectories/file.csv";
+String path = "../Trajectories/traj-01_07_2022-11.42.28.csv";
 
 
 
 void setup(){
-  size(1500, 900);
+  size(1500,900);
   trajectories = new HashMap();
   try{
     table = loadStrings(path);
