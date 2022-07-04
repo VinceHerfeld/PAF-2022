@@ -1,4 +1,0 @@
-Dans le cas d'un boid qui peut appartenir à un groupe ou à un autre : 
-Supposons que b1 et b2 soient des core, et que b3 n'en soit pas un. Si b3 est un voisin de b1 et b2, alors à quel groupe appartient-il? 
-Plusieurs possiblitées : soit on choisit aléatiorement les boids qui se propagent, donc il n'y aura pas de "priorité" d'un boid par rapport à l'autre, mais le problème est que le b3 va changer aléatoirement de groupe et ça peut faire quelque chose de bizarre.
-soit quand b3 est réveillé par b1 ou b2, il garde la distance qu'il a avec son père. Quand il reçoit un deuxième message de son autre voisin, il compare la distane qu'il a avec les deux et il choisit le plus proche.
