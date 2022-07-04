@@ -1,93 +1,66 @@
 // The Boid class
 
+class Boid extends Object{
 
-class Boid {
 
-  PVector position;
-  PVector velocity;
-  PVector acceleration;
-  float r;
   float maxforce;    // Maximum steering force
   float maxspeed;    // Maximum speed
-  ArrayList<Boid> neighbors;
-  int oldGroup, newGroup;
-  int red;
-  int green;
-  int blue;
-  int group;
-  int index;
-  int numNeigh;
-  boolean inObstacle = false;
-  
-  Boid () {}
-  
-  Boid(float x, float y, float directionX, float directionY) {
+  Group oldGroup, newGroup;
+  boolean activeCreate, activeTell;
 
-    acceleration = new PVector(directionX, directionY);
-    velocity = new PVector(directionX, directionY);
-
-    // This is a new PVector method not yet implemented in JS
-    // velocity = PVector.random2D();
-
-    // Leaving the code temporarily this way so that this example runs in JS
-    //float angle = random(TWO_PI);
-    //velocity = new PVector(cos(angle), sin(angle));
-
-    position = new PVector(x, y);
-    r = 4.0;
+  Boid(float x, float y, int id, PVector acc, PVector vel) {
+    super(x,y, BOIDRADIUS, id, "boid",acc, vel );
+    
     maxspeed = 2;
     maxforce = 0.03;
     
-    this.oldGroup = 0;
-    this.newGroup = 0;
-    this.neighbors = new ArrayList<Boid>();
-    }
-    
-    Boid(float x, float y) {
+    this.oldGroup = new Group();
+    this.newGroup = new Group();
+  }
 
-    // This is a new PVector method not yet implemented in JS
-    // velocity = PVector.random2D();
+  Boid(float x, float y, int id) {
+    super(x, y, BOIDRADIUS, id, "boid");
 
-    // Leaving the code temporarily this way so that this example runs in JS
     float angle = random(TWO_PI);
-    acceleration = new PVector(cos(angle), sin(angle));
-    velocity = new PVector(cos(angle), sin(angle));
-
-    position = new PVector(x, y);
-    r = 4.0;
+    this.velocity = new PVector(cos(angle), sin(angle));
     maxspeed = 2;
     maxforce = 0.03;
     
-    this.oldGroup = 0;
-    this.newGroup = 0;
-    this.neighbors = new ArrayList<Boid>();
+    this.oldGroup = new Group();
+    this.newGroup = new Group();
     }
-    
 
-  void run(Boid [][] map) {
+  void run(ArrayList<Boid>[][] map) {
+    this.activeCreate = false;
+    this.activeTell = false;
     this.oldGroup = newGroup;
-    this.newGroup = 0;
-    this.neighbors = searchNeighbours(map, 35);
-    this.numNeigh = neighbors.size();
-    if(numNeigh > 0){
-      flock(neighbors);
-    }
+    this.newGroup = new Group();
+    this.neighbors = this.searchNeighbors(map, DISTNEIGHBOR);
+    flock(map);
     update();
     borders();
   }
-
+  
+  float getX(){
+    return position.x;
+  }
+  
+  float getY(){
+    return position.y;
+  }
+  
   void applyForce(PVector force) {
     // We could add mass here if we want A = F / M
     acceleration.add(force);
   }
 
   // We accumulate a new acceleration each time based on three rules
-  void flock(ArrayList<Boid> boids) {
-    PVector sep = separate(boids);   // Separation
-    PVector ali = align(boids);      // Alignment
-    PVector coh = cohesion(boids);   // Cohesion
+  void flock(ArrayList<Boid>[][] map) {
+    PVector sep = separate(map);   // Separation
+    PVector ali = align(map);      // Alignment
+    PVector coh = cohesion(map);   // Cohesion
     // Arbitrarily weight these forces
-    sep.mult(2.0);
+    sep.mult(1.5);
     ali.mult(1.0);
     coh.mult(1.0);
     // Add the force vectors to acceleration
@@ -125,14 +98,17 @@ class Boid {
     return steer;
   }
 
-  void render(int[] biject) {
+  void render(int scale) {
+    if (this.neighbors.size() < NMIN && scale > 0){
+      return;
+    }
     // Draw a triangle rotated in the direction of velocity
-    float theta = velocity.heading() + radians(90);
+    float theta = velocity.heading2D() + radians(90);
     // heading2D() above is now heading() but leaving old syntax until Processing.js catches up
-    if (this.newGroup == 0){
+    if (this.newGroup.id == 0){
       fill(200, 200, 200);
     }else{
-      fill(colors.get((biject[this.newGroup] - 1) % nbColors).x, colors.get((biject[this.newGroup] - 1) % nbColors).y, colors.get((biject[this.newGroup] - 1) % nbColors).z);
+      fill(colors.get(this.newGroup.id % 12).x, colors.get(this.newGroup.id % 12).y, colors.get(this.newGroup.id % 12).z);
     }
     pushMatrix();
     translate(position.x, position.y);
@@ -140,9 +116,9 @@ class Boid {
     noStroke();
     //rect(0, 0, 10, 10);
     beginShape(TRIANGLES);
-    vertex(0, -r*2);
-    vertex(-r, r*2);
-    vertex(r, r*2);
+    vertex(0, -this.radius*2);
+    vertex(-this.radius, this.radius*2);
+    vertex(this.radius, this.radius*2);
     endShape();
     fill(255, 10);
     //circle(0,0,50);
@@ -152,36 +128,27 @@ class Boid {
 
   // Wraparound
   void borders() {
-    if (position.x < -r) position.x = width+r;
-    if (position.y < -r) position.y = height+r;
-    if (position.x > width+r) position.x = -r;
-    if (position.y > height+r) position.y = -r;
+    if (position.x < -this.radius) position.x = width+this.radius;
+    if (position.y < -this.radius) position.y = height+this.radius;
+    if (position.x > width+this.radius) position.x = -this.radius;
+    if (position.y > height+this.radius) position.y = -this.radius;
   }
-  float getX(){
-    return position.x;
-  }
-  
-  float getY(){
-    return position.y;
-  }
+
   // Separation
   // Method checks for nearby boids and steers away
-  PVector separate (ArrayList<Boid> boids) {
-    float desiredseparation = disInteract * 0.5;
+
+  PVector separate (ArrayList<Boid>[][] map) {
+    int desiredseparation = int(DISTINTERACT * 0.5);
     PVector steer = new PVector(0, 0, 0);
     int count = 0;
     // For every boid in the system, check if it's too close
-    for (Boid other : boids) {
-      float d = this.distance(other);
-      // If the distance is greater than 0 and less than an arbitrary amount (0 when you are yourself)
-      if ((d > 0) && (d < desiredseparation)) {
-        // Calculate vector pointing away from neighbor
-        PVector diff = PVector.sub(position, other.position);
-        diff.normalize();
-        diff.div(d);        // Weight by distance
-        steer.add(diff);
-        count++;            // Keep track of how many
-      }
+    for (Boid other : this.searchNeighbors(map, desiredseparation)) {
+      // Calculate vector pointing away from neighbor
+      PVector diff = PVector.sub(position, other.position);
+      diff.normalize();
+      diff.div((this.distance(other)+0.5));        // Weight by distance
+      steer.add(diff);
+      count++;            // Keep track of how many
     }
     // Average -- divide by how many
     if (count > 0) {
@@ -205,90 +172,113 @@ class Boid {
 
   // Alignment
   // For every nearby boid in the system, calculate the average velocity
-  PVector align (ArrayList<Boid> boids) {
-    PVector sum = new PVector(0, 0);
-    for (Boid other : boids) {
-      sum.add(other.velocity);
-    }
-    //sum.div((float) this.numNeigh);
-    // First two lines of code below could be condensed with new PVector setMag() method
-    // Not using this method until Processing.js catches up
-    // sum.setMag(maxspeed);
 
-    // Implement Reynolds: Steering = Desired - Velocity
-    sum.normalize();
-    sum.mult(maxspeed);
-    PVector steer = PVector.sub(sum, velocity);
-    steer.limit(maxforce);
-    return steer;
+  PVector align (ArrayList<Boid>[][] map) {
+    PVector sum = new PVector(0, 0);
+    int count = 0;
+    for (Boid other : this.searchNeighbors(map, DISTINTERACT)) {
+      sum.add(other.velocity);
+      count++;
+    }
+    if (count > 0) {
+      sum.div((float)count);
+      // First two lines of code below could be condensed with new PVector setMag() method
+      // Not using this method until Processing.js catches up
+      // sum.setMag(maxspeed);
+
+      // Implement Reynolds: Steering = Desired - Velocity
+      sum.normalize();
+      sum.mult(maxspeed);
+      PVector steer = PVector.sub(sum, velocity);
+      steer.limit(maxforce);
+      return steer;
+    } 
+    else {
+      return new PVector(0, 0);
+    }
   }
 
   // Cohesion
   // For the average position (i.e. center) of all nearby boids, calculate steering vector towards that position
-  PVector cohesion (ArrayList<Boid> boids) {
-    PVector sum = new PVector(0, 0);   // Start with empty vector to accumulate all positions
-    for (Boid other : boids) {
-      sum.add(other.position); // Add position
-    }
-    sum.div(this.numNeigh);
-    return seek(sum);  // Steer towards the position
-  }
 
-  void propagateGroup(int g){
-    this.newGroup = g;
-    for (Boid neighbor : this.neighbors){
-      if (neighbor.neighbors.size() >= nMin && neighbor.newGroup == 0){
-        neighbor.propagateGroup(g);
+  PVector cohesion (ArrayList<Boid>[][] map) {
+    PVector sum = new PVector(0, 0);   // Start with empty vector to accumulate all positions
+    int count = 0;
+    for (Boid other : this.searchNeighbors(map, DISTINTERACT)) {
+      sum.add(other.position); // Add position
+      count++;
+    }
+    if (count > 0) {
+      sum.div(count);
+      return seek(sum);  // Steer towards the position
+    } 
+    else {
+      return new PVector(0, 0);
+    }
+  }
+  
+  int createGroup(int gMin, HashMap<Integer, ArrayList<PVector>> trajectoriesAll,  HashMap<Integer, ArrayList<PVector>> trajectoriesCore, ArrayList<Group> groups, int scale){
+    if (this.neighbors.size() >= NMIN && !this.activeCreate){
+      Group g = this.propagateGroup(this);
+      int n = g.defineId(gMin);
+      if (n > gMin){
+        groups.add(g);
       }
-    }
-  }
-  
-  void joinGroup(){
-    Boid nearest = this.neighbors.get(0);
-    float dMin = PVector.dist(this.position, nearest.position);
-    for (Boid other : this.neighbors){
-      float d = this.distance(other);
-      if (d < dMin && nearest.neighbors.size() >= nMin) {
-        d = dMin;
-        nearest = other;
+      g.addTrajectories(trajectoriesAll, trajectoriesCore);
+      groups.set(g.id, g);
+      if(show){
+        g.renderCenter(scale);
+        g.renderVector(scale);
       }
-    }
-    if (nearest.neighbors.size() >= nMin){
-      this.newGroup = nearest.newGroup;
+      this.tellOthers(g, this);
+      return n;
+    } else {
+      return gMin;
     }
   }
   
-  float distance(Boid other){
-    PVector vect = new PVector(min(abs(this.position.x - other.position.x), width - abs(this.position.x - other.position.x)), min(abs(this.position.y - other.position.y), height - abs(this.position.y - other.position.y)));
-    return vect.mag();
-  }
-  
-  ArrayList<Boid> searchNeighbours(Boid[][] map, int eyeSight){
-    ArrayList<Boid> neigh = new ArrayList<Boid>();
-    int x = (int)position.x;
-    int y = (int)position.y;
-    for(int i = -eyeSight; i<eyeSight; i++){
-      for(int j=-eyeSight; j<eyeSight; j++){
-        if(i==0 && j==0){
-          int X = flock.mod_width(x+i);
-          int Y = flock.mod_height(y+j);
-          if(map[int(X/maillage)][int(Y/maillage)]!= this){
-            neigh.add(map[int(X/maillage)][int(Y/maillage)]);
+  Group propagateGroup(Boid father){
+    Group g = new Group();
+    if (this.activeCreate == false){
+      this.activeCreate = true;
+      if (this.neighbors.size() >= NMIN){
+        for (Boid neighbor : this.neighbors){
+          g.merge(neighbor.propagateGroup(this));
+        }
+        g.addBoid(this);
+      } else {
+        for (Boid neighbor : this.neighbors){
+          if (this.distance(neighbor) < this.distance(father)){
+            this.activeCreate = false;
+            return g;
           }
         }
-        else{
-          if (i*i+j*j < eyeSight*eyeSight) {
-            int X = flock.mod_width(x+i);
-            int Y = flock.mod_height(y+j);
-            if(map[int(X/maillage)][int(Y/maillage)]!= null){
-              neigh.add(map[int(X/maillage)][int(Y/maillage)]);
-              //print("1neighbour");
-            }
+        g.addBoid(this);
+      }
+    }
+    return g;
+  }
+  
+  void tellOthers(Group g, Boid father){
+    if (this.activeTell == false){
+      this.activeTell = true;
+      if (this.neighbors.size() >= NMIN){
+        for (Boid neighbor : this.neighbors){
+          neighbor.tellOthers(g, this);
+        }
+        this.newGroup = g;
+      } else {
+        for (Boid neighbor : this.neighbors){
+          if (this.distance(neighbor) < this.distance(father)){
+            this.activeTell = false;
           }
+        }
+        if (this.activeTell){
+          this.newGroup = g;
         }
       }
     }
-    return neigh;
   }
+   
   
 }
