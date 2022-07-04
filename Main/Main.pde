@@ -1,90 +1,64 @@
+import java.text.SimpleDateFormat;
+import java.util.*;
+
 Flock flock;
-int pause = 0;
+ArrayList<PVector> colors;
 
 /*
-  Paramètres globaux
+Paramètres globaux
 */
 
-int nBoids = 150;
-int nObst = 0;
-int frame = 30;
-int nMin = 2;
+int NMIN = 2;
+int FRAMERATE = 80;
+int NBOIDS = 40;
 
-int position = 2;
+int STARTPOS = 2;
+int DISTNEIGHBOR = 50;
+float BOIDRADIUS = 4.0;
+float OBSTACLERADIUS = 20.0;
 
-int newObsForce = 5;
-int disNeighbor = 30;
-int disInteract = 35;
-int maillage = 1; //maillage*maillage pixels par case du tableau map
-//maillage = 2 permet de coloriser les groupes isolés
-int nbColors = 12;
-int tour =0;
+int newObsForce1 = 4;
+int newObsForce2 = 8;
 
-
-
-PGraphics tails;
-ArrayList<PVector> colors;
-boolean saved = false;
-boolean show = false;
+int DISTINTERACT = 50;
+int MAILLAGE = 10;
 String DEL = ";";
 String SEP = "\n";
-boolean erase = true;
-
+boolean pause, show;
+int scale;
+int frame;
 
 void setup() {
-  size(1500, 900);
+  size(1080, 720);
   colors = new ArrayList<PVector>();
-  /*  
-  for (int i =0; i < nbColors ; i++){
-    int r = int(random(7));
-    int g = int(random(7));
-    g = g+int(random(6))*int(g==r);
-    g=g%7;
-    int b = int(random(7));
-    b=b+int(random(6))*int(b==g);
-    b=b%7;
-    colors.add(new PVector(80+25*r,80+25*g,80+25*b));
-  }
-  */
   colors.add(new PVector(255, 0, 0));
   colors.add(new PVector(0, 255, 0));
   colors.add(new PVector(0, 0, 255));
   colors.add(new PVector(255, 255, 0));
   colors.add(new PVector(255, 0, 255));
-  colors.add(new PVector(0, 255, 255));
+  colors.add(new PVector(0, 255, 0));
   colors.add(new PVector(255, 130, 0));
   colors.add(new PVector(0, 255, 130));
   colors.add(new PVector(130, 0, 255));
   colors.add(new PVector(255, 0, 130));
   colors.add(new PVector(130, 255, 0));
   colors.add(new PVector(0, 130, 255));
-  colors.add(new PVector(0, 130, 0));
-  colors.add(new PVector(130, 0, 0));
-  colors.add(new PVector(0, 0, 130));
-
-  /*
-  colors.add(new PVector(77, 122, 107));
-  colors.add(new PVector(157, 169, 19));
   
-  colors.add(new PVector(54, 169, 239));
-  colors.add(new PVector(57, 247, 93));
-  colors.add(new PVector(217, 216, 211));
-  colors.add(new PVector(77, 122, 107));
-  colors.add(new PVector(157, 169, 19));
-  */
-  flock = new Flock();
+  this.flock = new Flock();
   background(0);
+  frameRate(FRAMERATE);
+  this.show = false;
+  this.pause = false;
+  this.scale = 0;
+  this.frame = 0;
     
   // Add an initial set of boids into the system
-  for(int i = 0; i < nObst; i++){
-    flock.addObstacle(new Obstacle(flock, (int) random(width), (int)random(height), (int) random(1,10)));
-  }
   float directionX;
   float directionY;
-  switch(position){
+  switch(STARTPOS){
     case 0:
-      for (int i = 0; i < nBoids/2; i++) {
-        flock.addBoid(new Boid(random(width), random(height)));
+      for (int i = 0; i < NBOIDS/2; i++) {
+        flock.addBoid(random(width), random(height));
         //flock.addBoid(new Boid(width/2, height/2));
       }
       break;
@@ -92,88 +66,91 @@ void setup() {
     case 1:
        directionX = 1;
        directionY = -1;
-       for (int i = 0; i < nBoids/2; i++) {
-         flock.addBoid(new Boid(width/4, 3*height/4, directionX, directionY));
+       for (int i = 0; i < NBOIDS/2; i++) {
+         flock.addBoid(width/4, 3*height/4, directionX, directionY);
        }
        directionX = -1;
        directionY = -1;
-      for(int i=nBoids/2; i< nBoids; i++){
-         flock.addBoid(new Boid(3*width/4, 3*height/4, directionX, directionY));
+      for(int i=NBOIDS/2; i< NBOIDS; i++){
+         flock.addBoid(3*width/4, 3*height/4, directionX, directionY);
        }
        break;
      
      case 2:
        directionX = random(-1,1);
        directionY = random(-1,1);
-       for (int i = 0; i < nBoids/4; i++) {
-         flock.addBoid(new Boid(width/4, height/4, directionX, directionY));
+       for (int i = 0; i < NBOIDS/4; i++) {
+         flock.addBoid(width/4, height/4, directionX, directionY);
        }
        directionX = random(-1,1);
        directionY = random(-1,1);
-       for(int i=nBoids/4; i< nBoids/2; i++){
-         flock.addBoid(new Boid(3*width/4, 3*height/4, directionX, directionY));
+       for(int i=NBOIDS/4; i< NBOIDS/2; i++){
+         flock.addBoid(3*width/4, 3*height/4, directionX, directionY);
        }
        directionX = random(-1,1);
        directionY = random(-1,1);
-       for (int i = nBoids/2; i < 3*nBoids/4; i++) {
-         flock.addBoid(new Boid(width/4, 3*height/4, directionX, directionY));
+       for (int i = NBOIDS/2; i < 3*NBOIDS/4; i++) {
+         flock.addBoid(width/4, 3*height/4, directionX, directionY);
        }
        directionX = random(-1,1);
        directionY = random(-1,1);
-       for(int i=3*nBoids/4; i< nBoids; i++){
-         flock.addBoid(new Boid(3*width/4, height/4, directionX, directionY));
+       for(int i=3*NBOIDS/4; i< NBOIDS; i++){
+         flock.addBoid(3*width/4, height/4, directionX, directionY);
        }
        break;
          
   }
-
-  flock.initGroups();
-  frameRate(frame);
 }
 
 void draw() {
-  if (pause==0){
-    saved = false;
-    tour = (tour + 1) % 100;
-    if (tour == 30){
-      erase = false;
-    }
-    //background(60);
-    background(60);
-    flock.run();
+  if (!this.pause){
+    this.frame ++;
+    background(0);
+    this.flock.run(this.scale);
   }
-  else if(!saved){
-    saved = true;
-    saveToCSV();
-  }
-}
-
-// Add a new boid into the System
-/*
-void mousePressed() {
-  flock.addBoid(new Boid(mouseX,mouseY));
-}*/
-void mousePressed() {
-  pause = 1-pause;
 }
 
 void keyPressed(){
-  if(key == 'p'){
-    flock.addObstacle(new Obstacle(flock, mouseX, mouseY, newObsForce));
+  if(key == 'o'){
+    this.flock.addObstacle(mouseX, mouseY, newObsForce1);
+  }
+  if(key == 'O'){
+    this.flock.addObstacle(mouseX, mouseY, newObsForce2);
   }
   if (key == 'r'){
     setup();
   }
   if(key == 't'){
-    show = !show;
+    this.show = !this.show;
   }
+  if (key == ' '){
+    this.pause = !this.pause;
+  }
+  if(key == 's' && this.pause){
+    this.saveToCSV();
+  }
+  if(key == '0'){
+    this.scale = 0;
+  }
+  if(key == '1'){
+    this.scale = 1;
+  }
+  
+}
+
+// Add a new boid into the System
+void mousePressed() {
+  flock.addBoid(mouseX,mouseY);
 }
 
 void saveToCSV(){
-  Map<Integer, ArrayList<PVector>> traj = flock.trajectories;
-  saved = true;
+  Map<Integer, ArrayList<PVector>> traj = flock.trajectoriesAll;
+  SimpleDateFormat formatter = new SimpleDateFormat("dd_MM_yyyy-HH.mm.ss");  
+  Date date = new Date();  
+  print(formatter.format(date));
   try {
-    PrintWriter file = createWriter("./traj.csv");
+    String path = "../Trajectories/traj-" + formatter.format(date) + ".csv";
+    PrintWriter file = createWriter(path);
     for(int g : traj.keySet()){
       file.print(String.valueOf(g));
       file.print(DEL);
